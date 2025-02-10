@@ -1,1 +1,1 @@
-# LLM4chatting
+# LLM4planning
