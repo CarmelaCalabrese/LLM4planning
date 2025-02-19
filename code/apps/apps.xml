@@ -24,20 +24,20 @@
 
    <module>
       <name>yarprobotinterface</name>
-      <parameters>--config /workdir/apps/applications/language/googleTranscription.xml</parameters>
-      <node>localhost</node>
+      <parameters>--config /workdir/code/apps/googleTranscription.xml</parameters>
+      <node>llm_docker</node>
    </module>
 
    <module>
       <name>yarprobotinterface</name>
-      <parameters>--context /workdir/apps/applications/language/googleSynthesizer.xml</parameters>
-      <node>localhost</node>
+      <parameters>--context /workdir/code/apps/googleSynthesizer.xml</parameters>
+      <node>llm_docker</node>
     </module>
 
     <module>
 		<name>python3</name>
-		<parameters>/workdir/apps/iLLM/iLLM.py --config /workdir/apps/configs/gpt_config.json</parameters>
-		<node>localhost</node>
+		<parameters>/workdir/code/LLMchat.py --config /workdir/code/configs/gpt_config.json</parameters>
+		<node>llm_docker</node>
 	</module>
 
 
