@@ -84,6 +84,10 @@ class FakeRobotNWS(yarp.RFModule):
                 'shake': (3, 0.95),
                 't_pose': (7, 0.7),
                 'ready': (2, 0.95),
+                'neutral': (0.5, 0.99),   
+                'happy': (0.5, 0.99),
+                'alert': (0.5, 0.99),
+                'shy': (0.5, 0.99),
             }
 
             if action in action_map:

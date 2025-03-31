@@ -62,12 +62,12 @@ class LLMchat(yarp.RFModule):
         #     print("Error connecting to /server port")
         #     #exit()
 
-        # self.client_obj_det_rpc_port = yarp.Port()
-        # self.client_obj_det_rpc_port.open("/client_yolo_rpc")  # Name of the local port
+        self.client_obj_det_rpc_port = yarp.Port()
+        self.client_obj_det_rpc_port.open("/client_yolo_rpc")  # Name of the local port
 
-        # if not yarp.Network.connect("/client_yolo_rpc", "/yarpYolo/command/rpc"):
-        #     print("Error connecting to /yarpYolo/command/rpc port")
-        #     #exit()
+        if not yarp.Network.connect("/client_yolo_rpc", "/yarpYolo/command/rpc"):
+            print("Error connecting to /yarpYolo/command/rpc port")
+            #exit()
 
         # self.client_obj_dets_portName = '/yarpYolo/where_coords:i' #detections from /detection/dets:o
         # self.client_obj_dets_port = yarp.BufferedPortBottle()
@@ -140,10 +140,7 @@ class LLMchat(yarp.RFModule):
             log_file.write(f'{current_time} - Robot started up\n')
         return True
                
-
-    def encode_image(self, image):
-            return base64.b64encode(image).decode("utf-8")
-                                
+                               
 
     def _query_llm(self, messages, tool_choice: Union[Literal["none", "auto"]] = "auto"):
         response = ""
@@ -206,7 +203,7 @@ class LLMchat(yarp.RFModule):
            bottle.clear()
         intState_input = intState_input.strip()
 
-        if intState_input == 'Nothing is running'or intState_input == "":
+        if intState_input == 'Nothing is running' or intState_input == 'Nothing is running.' or intState_input == "":
             skip_intState = True
         else:
             print("🔎 Internal state: "+ intState_input)
@@ -251,14 +248,19 @@ class LLMchat(yarp.RFModule):
                         fcn = self.function_resolver[func]
                         done = False
                         if func=='do_response_action':
+                            print(fn_args)
                             action = fn_args["action"]
+                            if "object" in fn_args.keys():
+                                obj = fn_args["object"]
+                            else:
+                                obj = None
                             # fn_res = fcn(action)
-                            fn_res = fcn(action, self.client_fake_nws_rpc_port)
+                            fn_res = fcn(action, obj, self.client_fake_nws_rpc_port)
                             done = True
                         elif func=='apply_emotion':
                             emotion = fn_args["emotion"]
-                            #fn_res = fcn(emotion, self.client_emotion_rpc_port)
-                            fn_res = fcn(emotion)
+                            fn_res = fcn(emotion, self.client_fake_nws_rpc_port)
+                            #fn_res = fcn(emotion)
                             done = True
                         elif func=='speak':
                             spoken_text = fn_args["text"]
@@ -267,23 +269,12 @@ class LLMchat(yarp.RFModule):
                             done = True
                         elif func=='look_obj_around':
                             # self.messages.pop()
-                            #fn_res = fcn(self.client_obj_dets_port)
-                            fn_res = fcn()
+                            #fn_res = fcn(self.client_observer_rpc_port)
+                            fn_res = fcn(self.client_obj_det_rpc_port)
+                            #fn_res = fcn()
                             done = True
-                            # received_image = self._input_image_port.read()
-                            # self._in_buf_image.copy(received_image)   
-                            # frame = self._in_buf_array
-                            # img=Image.fromarray(np.uint8(frame)).convert('RGB')
-                            # buffered = BytesIO()
-                            # img.save(buffered, format='png')
-                            # print('Sto encodando l immagine')
-                            # base64_image = self.encode_image(buffered.getvalue())
-                            # print('Encoding terminato')
-                            # self.messages.append({"role": "user", "content":[
-                            #     {"type": "text", "text": f"{text_input}"},
-                            #     {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{base64_image}"}}
-                            # ]})
                         elif func=='feedback_from_env':
+                            print('feedback_from_env')
                             fn_res = fcn(self.client_observer_rpc_port)
                             done = True
                         else:

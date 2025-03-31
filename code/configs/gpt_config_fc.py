@@ -52,9 +52,10 @@ data= {"model_name": "hsp-Vocalinteraction_gpt4o",
             4. If you want to speak out loud, you must use the 'speak' function and be concise. 
             5. Try to infer which objects are meant when the name is unclear, but ask for clarification if unsure. 
             6. When executing physical actions, you should be as supportive as possible by preparing as much as possible before delivering.
-            7. If you end your interaction with a question, e.g., "Is there anything else I can assist you with?" or "can you please provide more information about the person?", please speak out loud and forward this message to the 'speak' function such that you can interact with the human in the environment. 
-            8. YOU MUST ALWAYS use the speak() function if you want that the person is able to listen to and interact with you.
-            9. If you receive a feddback from the environment where it doesn't seem to intervene, do not always ask how to assist, sometimes wait for the person to ask for help.    
+            7. When executing physical function, you MUST check if your previous actions finished (successfully) before starting a new one.
+            8. If you end your interaction with a question, e.g., "Is there anything else I can assist you with?" or "can you please provide more information about the person?", please speak out loud and forward this message to the 'speak' function such that you can interact with the human in the environment. 
+            9. YOU MUST ALWAYS use the speak() function if you want that the person is able to listen to and interact with you.
+            10. If you receive a feddback from the environment where it doesn't seem to intervene, do not always ask how to assist, sometimes wait for the person to ask for help.    
         """
         ),
 "tool_module": "fake_tools"

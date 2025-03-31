@@ -14,6 +14,7 @@ from typing import (
     Union,
 )
 from openai import AzureOpenAI
+from openai import OpenAI
 import numpy as np
 from datetime import datetime
 
@@ -45,10 +46,9 @@ class LLMinternalState(yarp.RFModule):
             print(f"Error loading sequences file: {e}")
             return False
 
-        self.azureOpenAI_client = AzureOpenAI(
-            azure_endpoint = self.config['endpoint'], 
-            api_key=os.getenv("AZURE_API_KEY"),
-            api_version=self.config['api_version']
+        self.azureOpenAI_client = OpenAI(
+            base_url = 'http://localhost:11434/v1',
+            api_key='ollama', # required, but unused
             )
         self.model = self.config['model_name']
         self.temperature = self.config['temperature']
@@ -97,7 +97,7 @@ class LLMinternalState(yarp.RFModule):
             file_content = file.read()
 
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        message={"role": "user", "content": f"It's {current_time}. From what you read, understand and summarize very briefly the most updated state of the internal state of the robot: \n\n{file_content}."}
+        message={"role": "user", "content": f"[INST] Current time {current_time}. From what you read, understand and provide the most updated state of the internal state of the robot: \n\n{file_content}.[/INST]"}
         self.messages.append(message)
 
         chatGPT_answer = False
