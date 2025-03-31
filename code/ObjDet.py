@@ -86,6 +86,8 @@ class ObjDet(yarp.RFModule):
         target_sizes = torch.tensor([image.size[::-1]])  # Convert (W, H) to (H, W)
         results = self.processor.post_process_object_detection(outputs, target_sizes=target_sizes, threshold=0.1)
 
+        
+
         # Draw the bounding boxes
         draw = ImageDraw.Draw(image)
 

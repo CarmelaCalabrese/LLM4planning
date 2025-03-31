@@ -13,6 +13,10 @@ tools = [
                         "type": "string", 
                         "description": "The name of the action to run. The action must be coherent with the interaction. Available values: ready [default], wave, shake, t_pose, take, pour, move.",
                         },
+					"object": {
+                        "type": "string", 
+                        "description": "The name of the object to run the action on. The object must be coherent with the interaction.",
+                        },
                     },
                 "required": ["action"]},
         },
