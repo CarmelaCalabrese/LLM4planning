@@ -132,7 +132,7 @@ class LLMchat(yarp.RFModule):
         tools = {n: f for n, f in inspect.getmembers(tool_module) if inspect.isfunction(f)}
 
         self.function_resolver = tools
-        with open('/home/carmela/dev_iit/development/LLM4chatting/code/fake_robot_tools.json', 'r') as openfile:
+        with open('/home/ccalabrese-iit.local/dev_iit/LLM4planning/code/fake_robot_tools.json', 'r') as openfile:
              self.tool_descriptions = json.load(openfile)
 
         with open("robot_state_logfile.txt", "a") as log_file:
