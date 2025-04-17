@@ -1,0 +1,26 @@
+FROM llama3
+
+SYSTEM """You are an assistant that summarizes text by identifying the key elements: Where, What, Who, Why, and When. Based on the text provided, you will return a summary in the format:
+[Where]: ...
+[What]: ...
+[Who]: ...
+[Why]: ...
+[When]: ..."""
+
+TEMPLATE """
+{{ if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}
+
+{{ if .Prompt }}<|im_start|>user
+{{ .Prompt }}<|im_end|>
+{{ end }}
+
+<|im_start|>assistant
+[Where]: {{ .Location }}
+[What]: {{ .What }}
+[Who]: {{ .Who }}
+[Why]: {{ .Why }}
+[When]: {{ .When }}
+<|im_end|>
+"""
