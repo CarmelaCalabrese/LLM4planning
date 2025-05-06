@@ -18,7 +18,7 @@ def do_response_action(action, object, fake_nws_rpc_port) -> str:
     Run the most appropriate action during human-robot interaction. You can be 'ready' [home posture-DEFAULT], 'wave' [wave your harm to say hello], 'shake' [shake hand to introduce yourself], 't_pose' [to assume a t-pose],'take' [take an object], 'pour' [pour a liquid object], 'move' [move an object]. 
     To call this function, you have to specify which action you want to do.
 
-    Available actions: ready [default], wave, shake, t_pose, take, pour, move
+    Available actions: ready [default], wave, shake, t_pose, pour, move
 
     :return: Result message.
     """
@@ -43,7 +43,7 @@ def do_response_action(action, object, fake_nws_rpc_port) -> str:
     print(msg)
 
     # Open the log file in append mode
-    with open("/home/carmela/dev_iit/development/LLM4chatting/robot_state_logfile.txt", "a") as log_file:
+    with open("/home/ccalabrese-iit.local/dev_iit/LLM4planning/code/robot_state_logfile.txt", "a") as log_file:
         log_file.write(msg)
 
     return "Command sent."
@@ -78,7 +78,7 @@ def apply_emotion(emotion, fake_nws_rpc_port) -> str:
     print(msg)
 
     # Open the log file in append mode
-    with open("/home/carmela/dev_iit/development/LLM4chatting/robot_state_logfile.txt", "a") as log_file:
+    with open("/home/ccalabrese-iit.local/dev_iit/LLM4planning/code/robot_state_logfile.txt", "a") as log_file:
         log_file.write(msg)
 
     return "Command sent."
@@ -239,3 +239,28 @@ def speak() -> str:
     if not result:
         return "Speaking"
     return result
+
+
+def grasp(graspbase_rpc_port) -> str:
+    """
+    Grasp an object.
+    
+    :return: Result message.
+    """
+   
+    request = yarp.Bottle()
+
+    # Add a command to the request bottle (you can modify this as needed)
+    request.addString(f'execute_grasp')  # Action
+
+    # Send the RPC command and receive the response
+    graspbase_rpc_port.write(request)
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    msg = f"[{current_time}] Command action 'execute_grasp' sent."
+    print(msg)
+
+    # Open the log file in append mode
+    with open("/home/ccalabrese-iit.local/dev_iit/LLM4planning/code/robot_state_logfile.txt", "a") as log_file:
+        log_file.write(msg)
+
+    return "Command sent."

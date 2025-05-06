@@ -87,6 +87,13 @@ class LLMchat(yarp.RFModule):
 
         if not yarp.Network.connect("/fake_nws_rpc", "/fake_robot_nws/rpc"):
             print("Error connecting to /fake_robot_nws/rpc port")
+
+        self.client_graspbase_rpc_port = yarp.Port()
+        self.client_graspbase_rpc_port.open("/grasp_rpc:cmd")  # Name of the local port
+
+        if not yarp.Network.connect("/grasp_rpc:cmd", "/gb-grasp-exec/rpc"):
+            print("Error connecting to /gb-grasp-exec/rpc port")
+         
               
         self.config_path = rf.check("config", yarp.Value("")).asString()
         if not self.config_path:
@@ -135,7 +142,7 @@ class LLMchat(yarp.RFModule):
         with open('/home/ccalabrese-iit.local/dev_iit/LLM4planning/code/fake_robot_tools.json', 'r') as openfile:
              self.tool_descriptions = json.load(openfile)
 
-        with open("robot_state_logfile.txt", "a") as log_file:
+        with open("/home/ccalabrese-iit.local/dev_iit/LLM4planning/code/robot_state_logfile.txt", "a") as log_file:
             current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             log_file.write(f'{current_time} - Robot started up\n')
         return True
@@ -276,6 +283,9 @@ class LLMchat(yarp.RFModule):
                         elif func=='feedback_from_env':
                             print('feedback_from_env')
                             fn_res = fcn(self.client_observer_rpc_port)
+                            done = True
+                        elif func=='grasp':
+                            fn_res = fcn(self.client_graspbase_rpc_port)
                             done = True
                         else:
                             fn_res = fcn(**fn_args)

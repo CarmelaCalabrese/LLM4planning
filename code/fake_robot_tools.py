@@ -66,6 +66,13 @@ tools = [
             "description": "It allows ergoCub speaking during human-robot interaction. To call this function, you have to the text to say. I returns result message.",
         }		
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "grasp",
+            "description": "Grasp an object."
+        },
+    },
 ]
 
 
