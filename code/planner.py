@@ -18,7 +18,7 @@ import numpy as np
 from datetime import datetime
 
 
-class LLMchat(yarp.RFModule):
+class Planner(yarp.RFModule):
 
     def configure(self, rf) :
         self.period = 1.0
@@ -253,7 +253,6 @@ class LLMchat(yarp.RFModule):
                                 obj = fn_args["object"]
                             else:
                                 obj = None
-                            # fn_res = fcn(action)
                             fn_res = fcn(action, obj, self.client_fake_nws_rpc_port)
                             done = True
                         elif func=='apply_emotion':
@@ -289,7 +288,6 @@ class LLMchat(yarp.RFModule):
                                 }
                             )
                 start_time = time.time()
-                # print('sto chiedendo a LLM')
                 chatGPT_answer = False
                 while not chatGPT_answer:
                     try:
@@ -329,7 +327,7 @@ class LLMchat(yarp.RFModule):
         
     def close(self):
         self.agent_text_port.close()
-        self.client_action_rpc_port.close()
+        self.client_fake_nws_rpc_port.close()
         self.client_emotion_rpc_port.close()
         self.agent_output_port.close()
         return True
@@ -338,8 +336,8 @@ class LLMchat(yarp.RFModule):
     def interruptModule(self):
         self.agent_text_port.interrupt()
         self.client_fake_nws_rpc_port.interrupt()
-        self.client_observer_rpc_port.interrupt()
-        # self.client_emotion_rpc_port.interruption()
+        #self.client_observer_rpc_port.interrupt()
+        self.client_emotion_rpc_port.interruption()
         self.agent_output_port()
         return True
     
@@ -349,7 +347,7 @@ if __name__ == '__main__':
     
     yarp.Network.init()
 
-    mod = LLMchat()
+    mod = Planner()
     rf = yarp.ResourceFinder()
     rf.setVerbose(True)
     rf.configure(sys.argv)
