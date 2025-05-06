@@ -80,11 +80,10 @@ def apply_emotion(emotion, client_port) -> str:
     request.addString("setEmotion")  # Command
     request.addString(f'{emotion}')  # Emotion
 
+
     # Send the RPC command and receive the response
     client_port.write(request, response)
     result = response.toString()
-
-    #result =f'Emotion {emotion} done'
 
     # Print the response
     print(f"Response: {result}")
