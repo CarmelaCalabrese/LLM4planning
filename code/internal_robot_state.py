@@ -74,7 +74,7 @@ class LLMinternalState(yarp.RFModule):
         return response
     
     def resume(self):
-        with open("/home/ccalabrese-iit.local/dev_iit/LLM4planning/code/robot_state_logfile.txt", "r") as file:
+        with open("robot_state_logfile.txt", "r") as file:
             file_content = file.read()
 
         message=[
@@ -93,7 +93,7 @@ class LLMinternalState(yarp.RFModule):
     
     def updateModule(self):
 
-        with open("/home/ccalabrese-iit.local/dev_iit/LLM4planning/code/robot_state_logfile.txt", "r") as file:
+        with open("/home/carmela/dev_iit/development/LLM4chatting/robot_state_logfile.txt", "r") as file:
             file_content = file.read()
 
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

@@ -111,7 +111,7 @@ class FakeRobotNWS(yarp.RFModule):
             reply.addString(f"Command action '{action}' ended with outcome: {response}")
             self.fake_nws_rpc_port.reply(reply)  # Send the reply back
 
-            log_file_path = "/home/ccalabrese-iit.local/dev_iit/LLM4planning/code/robot_state_logfile.txt"
+            log_file_path = "/home/carmela/dev_iit/development/LLM4chatting/robot_state_logfile.txt"
             with open(log_file_path, "a") as log_file:
                 log_file.write(msg + "\n")
 

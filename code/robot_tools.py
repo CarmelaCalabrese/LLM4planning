@@ -65,13 +65,6 @@ tools = [
             "description": "It allows ergoCub detecting the objects in the scene during human-robot interaction. It returns objects, condifence, and x,y positions in the image plane.",
         }
     },
-    {
-        "type": "function",
-        "function": {
-            "name": "grasp",
-            "description": "Grasp an object."
-        },
-    },
 ]
 
 

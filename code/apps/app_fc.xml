@@ -77,14 +77,9 @@
       <to>/observer/image:i</to>
     </connection>
 
-  <connection>
+    <connection>
 		<from>/observer/text:o</from>
 		<to>/observer/text:i</to>
-	</connection>
-
-  <connection>
-		<from>/intState/text:o</from>
-		<to>/intState/text:i</to>
 	</connection>
 
 <connection>
