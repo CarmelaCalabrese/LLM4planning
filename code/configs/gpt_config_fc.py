@@ -58,7 +58,7 @@ data= {"model_name": "hsp-Vocalinteraction_gpt4o",
             10. If you receive a feddback from the environment where it doesn't seem to intervene, do not always ask how to assist, sometimes wait for the person to ask for help.    
         """
         ),
-"tool_module": "tools"
+"tool_module": "fake_tools"
 }
 
 with open('./code/configs/gpt_config_fc.json', 'w') as json_file:

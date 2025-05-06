@@ -5,13 +5,17 @@ tools = [
         "type": "function",
         "function": {
             "name": "do_response_action",
-            "description": "Run the most appropriate action during human-robot interaction. You can be 'ready' [home posture-DEFAULT], 'wave' [wave your harm to say hello], 'shake' [shake hand to introduce yourself], 't_pose' [to assume a t-pose]. To call this function, you have to specify which action you want to do.",
+            "description": "Run the most appropriate action during human-robot interaction. You can be 'ready' [home posture-DEFAULT], 'wave' [wave your harm to say hello], 'shake' [shake hand to introduce yourself], 't_pose' [to assume a t-pose], 'take' [take an object], 'pour' [pour a liquid object], 'move' [move an object]. .. To call this function, you have to specify which action you want to do.",
             "parameters": {
 				"type": "object",
 				"properties": {
                     "action": {
                         "type": "string", 
-                        "description": "The name of the action to run. The action must be coherent with the interaction. Available values: ready [default], wave, shake, t_pose.",
+                        "description": "The name of the action to run. The action must be coherent with the interaction. Available values: ready [default], wave, shake, t_pose, take, pour, move.",
+                        },
+					"object": {
+                        "type": "string", 
+                        "description": "The name of the object to run the action on. The object must be coherent with the interaction.",
                         },
                     },
                 "required": ["action"]},
@@ -37,23 +41,6 @@ tools = [
 	{
         "type": "function",
         "function": {
-            "name": "speak",
-            "description": "It allows ergoCub speaking during human-robot interaction. To call this function, you have to the text to say.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "text": {
-                        "type": "string",
-                        "description": "The text to be spoken. The text must be coherent with the interaction.",
-                    },
-                },
-                "required": ["text"],
-            },
-        }
-    },
-	{
-        "type": "function",
-        "function": {
             "name": "get_action",
             "description": "Get the human action during human-robot interaction."
         }
@@ -64,6 +51,20 @@ tools = [
             "name": "look_obj_around",
             "description": "It allows ergoCub detecting the objects in the scene during human-robot interaction. It returns objects, condifence, and x,y positions in the image plane.",
         }
+    },
+	{
+		"type": "function",
+        "function": {
+            "name": "feedback_from_env",
+            "description": "It allows ergoCub to collect a feedback on the state of the scene during human-robot interaction.  It returns info on environment, people and objects.",
+        } 
+    },
+	{
+		"type": "function",
+        "function": {
+            "name": "speak",
+            "description": "It allows ergoCub speaking during human-robot interaction. To call this function, you have to the text to say. I returns result message.",
+        }		
     },
     {
         "type": "function",
@@ -76,5 +77,5 @@ tools = [
 
 
 
-with open("robot_tools.json", "w") as outfile:
+with open("fake_robot_tools.json", "w") as outfile:
 	json.dump(tools, outfile)

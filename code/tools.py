@@ -80,10 +80,11 @@ def apply_emotion(emotion, client_port) -> str:
     request.addString("setEmotion")  # Command
     request.addString(f'{emotion}')  # Emotion
 
-
     # Send the RPC command and receive the response
     client_port.write(request, response)
     result = response.toString()
+
+    #result =f'Emotion {emotion} done'
 
     # Print the response
     print(f"Response: {result}")
@@ -209,3 +210,28 @@ def look_obj_around(client_obj_dets_port) -> str:
     if not result:
         return "Checking"
     return result
+
+
+def grasp(graspbase_rpc_port) -> str:
+    """
+    Grasp an object.
+    
+    :return: Result message.
+    """
+   
+    request = yarp.Bottle()
+
+    # Add a command to the request bottle (you can modify this as needed)
+    request.addString(f'execute_grasp')  # Action
+
+    # Send the RPC command and receive the response
+    graspbase_rpc_port.write(request)
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    msg = f"[{current_time}] Command action 'execute_grasp' sent."
+    print(msg)
+
+    # Open the log file in append mode
+    with open("/home/ccalabrese-iit.local/dev_iit/LLM4planning/code/robot_state_logfile.txt", "a") as log_file:
+        log_file.write(msg)
+
+    return "Command sent."

@@ -55,11 +55,12 @@ class LLMchat(yarp.RFModule):
         #     print("Error connecting to /server port")
         #     #exit()
 
-        self.client_emotion_rpc_port = yarp.Port()
-        self.client_emotion_rpc_port.open("/client_emotion_rpc")  # Name of the local port
+        # self.client_emotion_rpc_port = yarp.Port()
+        # self.client_emotion_rpc_port.open("/client_emotion_rpc")  # Name of the local port
 
-        if not yarp.Network.connect("/client_emotion_rpc", "/ergoCubEmotions/rpc"):
-            print("Error connecting to /ergoCubEmotions/rpc port")
+        # if not yarp.Network.connect("/client_emotion_rpc", "/ergoCubEmotions/rpc"):
+        #     print("Error connecting to /server port")
+        #     #exit()
 
         self.client_obj_det_rpc_port = yarp.Port()
         self.client_obj_det_rpc_port.open("/client_yolo_rpc")  # Name of the local port
@@ -86,6 +87,13 @@ class LLMchat(yarp.RFModule):
 
         if not yarp.Network.connect("/fake_nws_rpc", "/fake_robot_nws/rpc"):
             print("Error connecting to /fake_robot_nws/rpc port")
+
+        self.client_graspbase_rpc_port = yarp.Port()
+        self.client_graspbase_rpc_port.open("/grasp_rpc:cmd")  # Name of the local port
+
+        if not yarp.Network.connect("/grasp_rpc:cmd", "/gb-grasp-exec/rpc"):
+            print("Error connecting to /gb-grasp-exec/rpc port")
+         
               
         self.config_path = rf.check("config", yarp.Value("")).asString()
         if not self.config_path:
@@ -131,10 +139,10 @@ class LLMchat(yarp.RFModule):
         tools = {n: f for n, f in inspect.getmembers(tool_module) if inspect.isfunction(f)}
 
         self.function_resolver = tools
-        with open('/app/LLM4planning/code/robot_tools.json', 'r') as openfile:
+        with open('/home/ccalabrese-iit.local/dev_iit/LLM4planning/code/fake_robot_tools.json', 'r') as openfile:
              self.tool_descriptions = json.load(openfile)
 
-        with open("/app/LLM4planning/code/robot_state_logfile.txt", "a") as log_file:
+        with open("/home/ccalabrese-iit.local/dev_iit/LLM4planning/code/robot_state_logfile.txt", "a") as log_file:
             current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             log_file.write(f'{current_time} - Robot started up\n')
         return True
@@ -258,10 +266,12 @@ class LLMchat(yarp.RFModule):
                             done = True
                         elif func=='apply_emotion':
                             emotion = fn_args["emotion"]
-                            fn_res = fcn(emotion, self.client_emotion_rpc_port)
+                            fn_res = fcn(emotion, self.client_fake_nws_rpc_port)
+                            #fn_res = fcn(emotion)
                             done = True
                         elif func=='speak':
                             spoken_text = fn_args["text"]
+                            #fn_res = fcn(emotion, client_emotion_rpc_port)
                             fn_res = fcn()
                             done = True
                         elif func=='look_obj_around':
@@ -273,6 +283,9 @@ class LLMchat(yarp.RFModule):
                         elif func=='feedback_from_env':
                             print('feedback_from_env')
                             fn_res = fcn(self.client_observer_rpc_port)
+                            done = True
+                        elif func=='grasp':
+                            fn_res = fcn(self.client_graspbase_rpc_port)
                             done = True
                         else:
                             fn_res = fcn(**fn_args)

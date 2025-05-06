@@ -126,12 +126,13 @@ class LLMobserver(yarp.RFModule):
             #self.messages.remove(request[0])
             return response
         except Exception as e:
+            print(response.usage)
             print(f'Error: {e}')
             return None
  
     
     def resume(self):
-        with open("logfile.txt", "r") as file:
+        with open("/home/ccalabrese-iit.local/dev_iit/LLM4planning/code/logfile.txt", "r") as file:
             file_content = file.read()
 
         message=[
@@ -171,7 +172,7 @@ class LLMobserver(yarp.RFModule):
         
         if response:
             # Open the log file in append mode
-            with open("logfile.txt", "a") as log_file:
+            with open("/home/ccalabrese-iit.local/dev_iit/LLM4planning/code/logfile.txt", "a") as log_file:
                 current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 log_file.write(f"[{current_time}] \n {response.choices[0].message.content}.\n")
 
