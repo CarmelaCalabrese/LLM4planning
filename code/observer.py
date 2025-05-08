@@ -43,8 +43,8 @@ class LLMobserver(yarp.RFModule):
         print('Preparing input image...')
         self._in_buf_array = np.ones((480, 640, 3), dtype=np.uint8)
         self._in_buf_image = yarp.ImageRgb()
-        #self._in_buf_image.resize(640, 480)
-        self._in_buf_image.resize(320, 240)
+        self._in_buf_image.resize(640, 480)
+        #self._in_buf_image.resize(320, 240)
         self._in_buf_image.setExternal(self._in_buf_array.data, self._in_buf_array.shape[1], self._in_buf_array.shape[0])
         print('... ok \n')
 

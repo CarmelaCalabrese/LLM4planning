@@ -39,21 +39,21 @@ class Planner(yarp.RFModule):
         self.intState_text_port = yarp.BufferedPortBottle()
         self.intState_text_port.open(self.intState_text_portName)
 
-        # # Open RPC client ports
-        # self.client_action_rpc_port = yarp.Port()
-        # self.client_action_rpc_port.open("/client_action_rpc")  # Name of the local port
+        # Open RPC client ports
+        self.client_action_rpc_port = yarp.Port()
+        self.client_action_rpc_port.open("/client_action_rpc")  # Name of the local port
 
-        # if not yarp.Network.connect("/client_action_rpc", "/commandPrompt"):
-        #     print("Error connecting to /server port")
-        #     #exit()
+        if not yarp.Network.connect("/client_action_rpc", "/commandPrompt"):
+            print("Error connecting to /commandPrompt port")
+            exit()
 
-        # # Open RPC client ports
-        # self.manipulation_rpc_port = yarp.Port()
-        # self.manipulation_rpc_port.open("/manipulation_rpc")  # Name of the local port
+        # Open RPC client ports
+        self.manipulation_rpc_port = yarp.Port()
+        self.manipulation_rpc_port.open("/manipulation_rpc")  # Name of the local port
 
-        # if not yarp.Network.connect("/manipulation_rpc", "/Components/Manipulation"):
-        #     print("Error connecting to /server port")
-        #     #exit()
+        if not yarp.Network.connect("/manipulation_rpc", "/Components/Manipulation"):
+            print("Error connecting to /Components/Manipulation port")
+            exit()
 
         self.client_emotion_rpc_port = yarp.Port()
         self.client_emotion_rpc_port.open("/client_emotion_rpc")  # Name of the local port
@@ -64,9 +64,9 @@ class Planner(yarp.RFModule):
         self.client_obj_det_rpc_port = yarp.Port()
         self.client_obj_det_rpc_port.open("/client_yolo_rpc")  # Name of the local port
 
-        if not yarp.Network.connect("/client_yolo_rpc", "/yarpYolo/command/rpc"):
-            print("Error connecting to /yarpYolo/command/rpc port")
-            #exit()
+        # if not yarp.Network.connect("/client_yolo_rpc", "/yarpYolo/command/rpc"):
+        #     print("Error connecting to /yarpYolo/command/rpc port")
+        #     #exit()
 
         # self.client_obj_dets_portName = '/yarpYolo/where_coords:i' #detections from /detection/dets:o
         # self.client_obj_dets_port = yarp.BufferedPortBottle()
@@ -210,8 +210,6 @@ class Planner(yarp.RFModule):
             self.messages.append({"role": "user", "content": intState_input})
 
         if any([not(skip_human), not(skip_obs), not(skip_intState)]):
-        # if True:
-            # print('Ora chiedo a LLM')
             chatGPT_answer = False
             while not chatGPT_answer:
                 try:
@@ -253,15 +251,16 @@ class Planner(yarp.RFModule):
                                 obj = fn_args["object"]
                             else:
                                 obj = None
-                            fn_res = fcn(action, obj, self.client_fake_nws_rpc_port)
+                            #fn_res = fcn(action, obj, self.client_fake_nws_rpc_port)
+                            fn_res = fcn(action, self.client_action_rpc_port, self.manipulation_rpc_port)
                             done = True
                         elif func=='apply_emotion':
                             emotion = fn_args["emotion"]
-                            fn_res = fcn(emotion, self.client_emotion_rpc_port)
+                            fn_res = fcn(emotion, self.client_emotion_rpc_port, self.manipulation_rpc_port)
                             done = True
                         elif func=='speak':
                             spoken_text = fn_args["text"]
-                            fn_res = fcn()
+                            fn_res = fcn(spoken_text)
                             done = True
                         elif func=='look_obj_around':
                             # self.messages.pop()

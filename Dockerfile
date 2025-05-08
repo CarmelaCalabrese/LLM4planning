@@ -25,7 +25,7 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py310_24.1.2-0-L
 WORKDIR /app
 
 RUN conda install -y -c conda-forge yarp
-RUN pip install openai pillow 
+RUN pip install openai pillow opencv-python matplotlib
 
 RUN curl -fsSL https://ollama.com/install.sh | sh
 ENV PATH="/root/.ollama/bin:$PATH"

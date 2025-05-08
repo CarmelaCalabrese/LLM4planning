@@ -1,0 +1,118 @@
+
+<application>
+<name>DemoLLM_FC</name>
+    <authors>
+        <author email="carmela.calabrese@iit.it">Carmela Calabrese</author>
+    </authors>
+
+  <!-- yarprobotinterface -->
+  <!-- yarpmotorgui -->
+  <!-- realsense -->
+  <!-- emotions -->
+
+  <module>
+		<name>yarpview</name>
+		<parameters>--name /viewer</parameters>
+    <node>localhost</node>
+	</module>
+
+  <module>
+		<name>python</name>
+		<parameters>/home/carmela/dev_iit/development/LLM4chatting/code/FakeRobotNWS.py</parameters>
+	</module>
+  
+  <module>
+		<name>python</name>
+		<parameters>/app/LLM4chatting/code/planner.py --config /app/LLM4chatting/code/configs/gpt_config_fc.json</parameters>
+    <node>planner_node</node>
+  </module>
+
+  <module>
+		<name>python</name>
+		<parameters>/app/LLM4chatting/code/observer.py --config /app/LLM4chatting/code/configs/gpt_config_obs.json</parameters>
+    <node>planner_node</node>
+	</module>
+
+  <module>
+		<name>python</name>
+		<parameters>/app/LLM4chatting/code/internal_robot_state.py --config /app/LLM4chatting/code/configs/gpt_config_intState.json</parameters>
+    <node>planner_node</node>
+	</module>
+
+  <module>
+    <name>yarprobotinterface</name>
+    <parameters>--config /home/carmela/dev_iit/development/LLM4chatting/code/apps/micAudio.xml</parameters>
+    <node>localhost</node>
+   </module>
+
+	<module>
+        <name>yarprobotinterface</name>
+        <parameters>--config /home/carmela/dev_iit/development/LLM4chatting/code/apps/audioPlayer.xml</parameters>
+        <node>localhost</node>
+    </module>
+
+    <module>
+      <name>voiceActivationDetection</name>
+      <node>localhost</node>
+   </module>
+
+   <module>
+      <name>yarprobotinterface</name>
+      <parameters>--config /workdir/code/apps/googleTranscription.xml</parameters>
+      <node>llm_docker</node>
+   </module>
+
+   <module>
+      <name>yarprobotinterface</name>
+      <parameters>--config /workdir/code/apps/googleSynthesizer.xml</parameters>
+      <node>llm_docker</node>
+    </module>
+
+    <!-- Modules connections -->
+
+	<connection>
+      <from>/depthCamera/rgbImage:o</from>
+      <to>/viewer</to>
+    </connection>
+
+	<connection>
+      <from>/depthCamera/rgbImage:o</from>
+      <to>/observer/image:i</to>
+    </connection>
+
+  <connection>
+		<from>/observer/text:o</from>
+		<to>/observer/text:i</to>
+	</connection>
+
+<connection>
+      <from>/audioRecorder_nws/audio:o</from>
+      <to>/vad/audio:i</to>
+      <protocol>tcp+recv.portmonitor+file.soundfilter_resample+type.dll+channel.0+frequency.16000</protocol>
+   </connection>
+
+	<connection>
+      <from>/vad/audio:o</from>
+      <to>/speechTranscription_nws/sound:i</to>
+      <protocol>tcp+recv.portmonitor+file.soundfilter_resample+type.dll+channel.0+frequency.16000</protocol>
+   </connection>
+
+    <connection>
+		<from>/speechTranscription_nws/text:o</from>
+		<to>/iLLM/text:i</to>
+		<protocol>fast_tcp</protocol>
+	</connection>
+
+    <connection>
+		<from>/iLLM/text:o</from>
+		<to>/speechSynthesizer_nws/text:i</to>
+		<protocol>fast_tcp</protocol>
+	</connection>
+
+	<connection>
+      <from>/googleSpeechSynthesis/sound:o</from>
+      <to>/audioPlayerWrapper/audio:i</to>
+      <protocol>fast_tcp</protocol>
+   </connection>
+
+</application>

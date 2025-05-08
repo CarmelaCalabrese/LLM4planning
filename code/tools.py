@@ -34,20 +34,26 @@ def do_response_action(action, client_port, manipulation_port) -> str:
     # Send the RPC command and receive the response
     client_port.write(request, response)
     result = response.toString()
-    if result == 'Problema'or 'Capito':
-        result = 'Fatto'
-    print(f"Response: Action {action} result: {result}")
+    # if result == 'Problema'or 'Capito':
+    #     result = 'done'
+    # print(f"Response: Action {action} result: {result}")
 
-    # check_act = False
-    # while check_act:
-    #     print('Sono qui')
-    #     manipulation_port.write('is_finished', response)
-    #     result = response.toString()
-    #     print(result)
-    #     if result=='[ok]':
-    #         check_act = True
-    # # Add a command to the request bottle (you can modify this as needed)
-    # request.addString('ready')  # Action
+    check_act = False
+    while check_act:
+        print('Sono qui')
+        manipulation_port.write('is_finished', response)
+        #result = response.toString()
+        if result=='[ok]':
+            check_act = True
+        print(result)
+
+    time.sleep(5)
+    # Add a command to the request bottle (you can modify this as needed)
+    request2 = yarp.Bottle()
+    response2 = yarp.Bottle()
+
+    request2.addString('home')  # Back home
+    client_port.write(request2, response2)
 
     # # Send the RPC command and receive the response
     # client_port.write(request, response)
@@ -61,7 +67,7 @@ def do_response_action(action, client_port, manipulation_port) -> str:
     return result
 
 
-def apply_emotion(emotion, client_port) -> str:
+def apply_emotion(emotion, client_port, manipulation_port) -> str:
 #def apply_emotion(emotion) -> str:
     """
     Run the most appropriate emotion on ergoCub's face during human-robot interaction. You can smile, be puzzled, be unhappy. 
@@ -87,6 +93,24 @@ def apply_emotion(emotion, client_port) -> str:
 
     # Print the response
     print(f"Response: {result}")
+
+    time.sleep(10)
+
+    # # Check if any action is running, I keep the emotion and then I go back to neutral
+    # check_act = False
+    # while check_act:
+    #     manipulation_port.write('is_finished', response)
+    #     #result = response.toString()
+    #     if result=='[ok]':
+    #         check_act = True
+
+    # # Add a command to the request bottle (you can modify this as needed)
+    # request2 = yarp.Bottle()
+    # response2 = yarp.Bottle()
+
+    # request2.addString("setEmotion")  # Command
+    # request2.addString("neutral")  # Emotion
+    # client_port.write(request2, response2)
 
     if not result:
         return "Emotion running"
