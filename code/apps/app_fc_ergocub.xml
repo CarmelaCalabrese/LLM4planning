@@ -11,9 +11,56 @@
   <!-- emotions -->
 
   <module>
+		<name>yarplogger</name>
+		<parameters>--start</parameters>
+    <node>ergocub001-lap</node>
+  </module>
+
+  <module>
+		<name>yarprobotinterface</name>
+		<parameters>--config ergocub_all.xml</parameters>
+    <node>ergocub-torso</node>
+  </module>
+
+  <module>
+		<name>yarpmotorgui</name>
+		<parameters>--from custom_positions.ini</parameters>
+    <node>ergocub001-lap</node>
+  </module>
+
+  <module>
+		<name>yarprobotinterface</name>
+		<parameters>--config realsense2.xml</parameters>
+    <node>ergocub-head</node>
+  </module>
+
+  <module>
+		<name>ergocubEmotions</name>
+		<parameters>--context ergoCubEmotions --from config.ini</parameters>
+    <node>ergocub-head</node>
+  </module>
+
+  <module>
+		<name>/usr/local/src/robot/hsp/ergocub-bimanual/build/command_prompt</name>
+		<parameters>/Components/Manipulation /usr/local/src/robot/hsp/ergocub-bimanual/config/ergocub_real.ini</parameters>
+    <node>ergocub-torso</node>
+  </module>
+
+  <module>
+		<name>/usr/local/src/robot/hsp/ergocub-bimanual/build/command_server</name>
+		<parameters>/Components/Manipulation /ergocub /usr/local/src/robot/robotology-superbuild/src/ergocub-software/urdf/ergoCub/robots/ergoCubSN001/model.urdf /usr/local/src/robot/hsp/ergocub-bimanual/config/ergocub_real_wristless.ini</parameters>
+    <node>ergocub-torso</node>
+  </module>
+
+  <module>
 		<name>yarpview</name>
 		<parameters>--name /viewer</parameters>
-    <node>localhost</node>
+    <node>ergocub001-lap</node>
+	</module>
+
+  <module>
+		<name>python</name>
+		<parameters>/home/carmela/dev_iit/development/LLM4chatting/code/chatGUI.py</parameters>
 	</module>
 
   <module>
@@ -23,7 +70,7 @@
   
   <module>
 		<name>python</name>
-		<parameters>/app/LLM4chatting/code/planner.py --config /app/LLM4chatting/code/configs/gpt_config_fc.json</parameters>
+		<parameters>/app/LLM4chatting/code/planner_GUI.py --config /app/LLM4chatting/code/configs/gpt_config_fc.json</parameters>
     <node>planner_node</node>
   </module>
 
@@ -41,31 +88,37 @@
 
   <module>
     <name>yarprobotinterface</name>
-    <parameters>--config /home/carmela/dev_iit/development/LLM4chatting/code/apps/micAudio.xml</parameters>
-    <node>localhost</node>
-   </module>
-
-	<module>
-        <name>yarprobotinterface</name>
-        <parameters>--config /home/carmela/dev_iit/development/LLM4chatting/code/apps/audioPlayer.xml</parameters>
-        <node>localhost</node>
-    </module>
-
+    <parameters>--context speechPipeline --from micAudio.ini --mic_sound_on_stop 0 --mic_start 1 --mic_min_samples 4000 --mic_max_samples 4000</parameters>
+    <node>ergocub-head</node>
+  </module>
+    
+    
+  <module>
+    <name>sileroVAD</name>
+    <parameters></parameters>
+    <environment>YARP_LOG_PROCESS_LABEL=VAD</environment>
+    <node>speech_docker</node>
+  </module>
+    
+  <module>
+    <name>yarprobotinterface</name>
+    <parameters>--context vadModule --from audioPlayer.ini</parameters>
+    <node>speech_docker</node>
+  </module>
+    
+  
+      <!-- speech synthesizer -->
     <module>
-      <name>voiceActivationDetection</name>
-      <node>localhost</node>
-   </module>
-
-   <module>
-      <name>yarprobotinterface</name>
-      <parameters>--config /workdir/code/apps/googleTranscription.xml</parameters>
-      <node>llm_docker</node>
-   </module>
-
-   <module>
-      <name>yarprobotinterface</name>
-      <parameters>--config /workdir/code/apps/googleSynthesizer.xml</parameters>
-      <node>llm_docker</node>
+    <name>yarprobotinterface</name>
+    <parameters>--context google --from googleSynthesizer.ini</parameters>
+    <node>speech_docker</node>
+    </module>
+    
+    
+      <module>
+    <name>yarprobotinterface</name>
+    <parameters>--context google --from googleTranscription.ini</parameters>
+    <node>speech_docker</node>
     </module>
 
     <!-- Modules connections -->
@@ -85,7 +138,7 @@
 		<to>/observer/text:i</to>
 	</connection>
 
-<connection>
+<!-- <connection>
       <from>/audioRecorder_nws/audio:o</from>
       <to>/vad/audio:i</to>
       <protocol>tcp+recv.portmonitor+file.soundfilter_resample+type.dll+channel.0+frequency.16000</protocol>
@@ -95,24 +148,46 @@
       <from>/vad/audio:o</from>
       <to>/speechTranscription_nws/sound:i</to>
       <protocol>tcp+recv.portmonitor+file.soundfilter_resample+type.dll+channel.0+frequency.16000</protocol>
-   </connection>
+   </connection> -->
 
-    <connection>
+<!--     <connection>
 		<from>/speechTranscription_nws/text:o</from>
 		<to>/iLLM/text:i</to>
 		<protocol>fast_tcp</protocol>
-	</connection>
+	</connection> -->
 
-    <connection>
-		<from>/iLLM/text:o</from>
+  <!-- Connections -->
+ 
+  <connection>
+    <from>/audioRecorder_nws/audio:o</from>
+    <to>/vad/audio:i</to>
+  </connection>
+ 
+  <connection>
+    <from>/vad/audio:o</from>
+    <to>/speechTranscription_nws/sound:i</to>
+  </connection>
+ 
+  <connection>  
+    <from>/speechTranscription_nws/text:o</from>
+    <to>/agent/text:i</to>
+  </connection>
+ 
+  <connection>
+		<from>/agent/text:o</from>
 		<to>/speechSynthesizer_nws/text:i</to>
 		<protocol>fast_tcp</protocol>
 	</connection>
 
-	<connection>
-      <from>/googleSpeechSynthesis/sound:o</from>
-      <to>/audioPlayerWrapper/audio:i</to>
-      <protocol>fast_tcp</protocol>
-   </connection>
+  <connection>
+    <from>/speechSynthesizer_nws/sound:o</from>
+    <to>/audioPlayerWrapper/audio:i</to>
+    <protocol>fast_tcp</protocol>
+  </connection>
 
 </application>
+
+
+
+ 
+
