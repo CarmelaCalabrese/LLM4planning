@@ -64,16 +64,16 @@ class Planner(yarp.RFModule):
         self.client_obj_det_rpc_port = yarp.Port()
         self.client_obj_det_rpc_port.open("/client_yolo_rpc")  # Name of the local port
 
-        if not yarp.Network.connect("/client_yolo_rpc", "/yarpYolo/command/rpc"):
-            print("Error connecting to /yarpYolo/command/rpc port")
+        if not yarp.Network.connect("/client_yolo_rpc", "/yoloWDet/rpc:i"):
+            print("Error connecting to /yoloWDet/rpc:i port")
             #exit()
 
-        # self.client_obj_dets_portName = '/yarpYolo/where_coords:i' #detections from /detection/dets:o
-        # self.client_obj_dets_port = yarp.BufferedPortBottle()
-        # self.client_obj_dets_port.open(self.client_obj_dets_portName)
+        self.client_obj_dets_portName = '/yoloWDet/dets:i' #detections from /detection/dets:o
+        self.client_obj_dets_port = yarp.BufferedPortBottle()
+        self.client_obj_dets_port.open(self.client_obj_dets_portName)
 
-        # if not yarp.Network.connect("/yarpYolo/where_coords:o", "/yarpYolo/where_coords:i"):
-        #     print("Error connecting to /server port")
+        if not yarp.Network.connect("/yoloWDet/dets:o", "/yoloWDet/dets:i"):
+            print("Error connecting to /yoloWDet/dets:o port")
 
         self.client_observer_rpc_port = yarp.Port()
         self.client_observer_rpc_port.open("/observer_rpc")  # Name of the local port
@@ -286,9 +286,8 @@ class Planner(yarp.RFModule):
                             fn_res = fcn()
                             done = True
                         elif func=='look_obj_around':
-                            # self.messages.pop()
-                            #fn_res = fcn(self.client_observer_rpc_port)
-                            fn_res = fcn(self.client_obj_det_rpc_port)
+                            object = fn_args["object"]
+                            fn_res = fcn(self.client_obj_det_rpc_port, self.client_obj_dets_port, object)
                             #fn_res = fcn()
                             done = True
                         elif func=='feedback_from_env':

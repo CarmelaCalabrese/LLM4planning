@@ -58,13 +58,27 @@
 	</module>
 
   <module>
-		<name>python</name>
-		<parameters>/home/carmela/dev_iit/development/LLM4chatting/code/chatGUI.py</parameters>
+		<name>yarpview</name>
+		<parameters>--name /viewer_yoloDet</parameters>
+    <node>ergocub001-lap</node>
 	</module>
 
   <module>
 		<name>python</name>
-		<parameters>/home/carmela/dev_iit/development/LLM4chatting/code/FakeRobotNWS.py</parameters>
+		<parameters>/app/yarp_yolo_world.py</parameters>
+    <node>yolo_node</node>
+	</module>
+
+  <module>
+		<name>python</name>
+		<parameters>/app/LLM4chatting/code/chatGUI.py</parameters>
+    <node>planner_node</node>
+	</module>
+
+  <module>
+		<name>python</name>
+		<parameters>/app/LLM4chatting/code/FakeRobotNWS.py</parameters>
+    <node>planner_node</node>
 	</module>
   
   <module>
@@ -123,14 +137,24 @@
     <!-- Modules connections -->
 
 	<connection>
-      <from>/depthCamera/rgbImage:o</from>
-      <to>/viewer</to>
-    </connection>
+    <from>/depthCamera/rgbImage:o</from>
+    <to>/viewer</to>
+  </connection>
+
+  <connection>
+    <from>/depthCamera/rgbImage:o</from>
+    <to>/yoloWDet/image:i</to>
+  </connection>
+
+  <connection>
+    <from>/yoloWDet/image:o</from>
+    <to>/viewer2</to>
+  </connection>
 
 	<connection>
-      <from>/depthCamera/rgbImage:o</from>
-      <to>/observer/image:i</to>
-    </connection>
+    <from>/depthCamera/rgbImage:o</from>
+     <to>/observer/image:i</to>
+  </connection>
 
   <connection>
 		<from>/observer/text:o</from>

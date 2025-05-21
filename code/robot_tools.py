@@ -63,6 +63,16 @@ tools = [
         "function": {
             "name": "look_obj_around",
             "description": "It allows ergoCub detecting the objects in the scene during human-robot interaction. It returns objects, condifence, and x,y positions in the image plane.",
+			"parameters": {
+                "type": "object",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "The list of the object to look for.",
+                    },
+                },
+                "required": ["object"],
+            },
         }
     },
 ]

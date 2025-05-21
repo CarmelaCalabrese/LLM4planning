@@ -179,34 +179,26 @@ def get_action() -> str:
     return result
 
 
-#def look_obj_around(client_port) -> str:
-def look_obj_around(client_obj_dets_port) -> str:
-#def look_obj_around() -> str:
+
+def look_obj_around(client_obj_det_rpc_port, client_obj_dets_port, object) -> str:
+
     """
     It allows ergoCub detecting the objects in the scene during human-robot interaction. 
 
-    :return: It returns objects, condifence, and x,y positions in the image plane.
+    :return: It returns objects, confidence, and x,y positions in the image plane.
     """
    
-    # # Create a request bottle and a response bottle
-    # request = yarp.Bottle()
-    # response = yarp.Bottle()
+    # Create a request bottle and a response bottle
+    request = yarp.Bottle()
+    response = yarp.Bottle()
 
-    # # Add a command to the request bottle (you can modify this as needed)
-    # request.addString("command_name")  # Command
-    # request.addString(f'{action}')  # Action
+    # Add a command to the request bottle (you can modify this as needed)
+    request.addString("get_bbox")  # Command
+    request.addString(f'{object}')  # Action
 
-    # # Send the RPC command and receive the response
-    # client_port.write(request, response)
-    # result = response.toString()
-
-    #result =f'The person is waving.'
-
-    # client_obj_det_port = yarp.Port()
-    # client_obj_det_port.open("/yarpYolo/where_coords:i")  # Name of the local port
-
-    # if not yarp.Network.connect("/yarpYolo/where_coords:o", "/yarpYolo/where_coords:i"):
-    #     print("Error connecting to /server port")
+    # Send the RPC command and receive the response
+    client_obj_det_rpc_port.write(request, response)
+    result = response.toString()
 
     detection = []
     received_bboxes = client_obj_dets_port.read()
