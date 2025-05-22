@@ -180,6 +180,7 @@ def get_action() -> str:
 
 
 
+#def look_obj_around(client_obj_det_rpc_port, client_gaze_rpc_port, client_obj_dets_port, object) -> str:
 def look_obj_around(client_obj_det_rpc_port, client_obj_dets_port, object) -> str:
 
     """
@@ -200,26 +201,52 @@ def look_obj_around(client_obj_det_rpc_port, client_obj_dets_port, object) -> st
     client_obj_det_rpc_port.write(request, response)
     result = response.toString()
 
+    time.sleep(0.5)
+
+    # # Create a request bottle and a response bottle
+    # request = yarp.Bottle()
+    # response = yarp.Bottle()
+
+    # # Add a command to the request bottle (you can modify this as needed)
+    # request.addString("look_at")  # Command
+    # request.addFloat64(f'{object}')  # Position
+
+    # # Send the RPC command and receive the response
+    # client_gaze_rpc_port.write(request, response)
+    # result = response.toString()
+
     detection = []
     received_bboxes = client_obj_dets_port.read()
     if received_bboxes:
 
             print(f'# Boxes: {received_bboxes.size()}')
 
-            for i in range(0, received_bboxes.size()):
+            if received_bboxes.size()==0:
+                print(f"Sorry, I do not see the object you look for.")
+                detection.append(f"Sorry, I do not see the object you look for.")
+            else:
+                for i in range(0, received_bboxes.size()):
 
-                print(f'Box idx: {i+1}')
-                bboxe_btl = received_bboxes.get(i).asList()
-                print(bboxe_btl)
+                    print(f'Box idx: {i+1}')
+                    bboxe_btl = received_bboxes.get(i).asList()
 
-                obj_name = bboxe_btl.get(0).asString()
-                conf = bboxe_btl.get(1).asFloat64()
-                x = bboxe_btl.get(2).asInt32()
-                y = bboxe_btl.get(3).asInt32()
+                    x1y1x2y2 = bboxe_btl.get(0).asList()
+                    x1y1x2y2_list= []
+                    for i in range(0, x1y1x2y2.size()):
+                        x1y1x2y2_list.append(int(x1y1x2y2.get(i).asFloat64()))
+                    
+                    centroid = bboxe_btl.get(1).asList()
+                    centroid_list= []
+                    for i in range(0, centroid.size()):
+                        centroid_list.append(int(centroid.get(i).asInt64()))
 
-                print(f"I see {obj_name} with confidence score {conf} in position {x} and {y} in the image plane. ")
-                detection.append(f"I see {obj_name} with confidence score {conf} in position {x} and {y} in the image plane. ")
-    print(detection)
+                    label = bboxe_btl.get(2).asString()
+                    conf = bboxe_btl.get(3).asFloat64()
+
+                    print(f"I see {label} with confidence score {conf} in position {centroid_list} in the image plane.")
+                    detection.append(f"I see {label} with confidence score {conf} in position {centroid} in the image plane.")
+                    
+                    
     result = ''.join(detection)
 
     if not result:

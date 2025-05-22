@@ -81,6 +81,12 @@ class Planner(yarp.RFModule):
         if not yarp.Network.connect("/observer_rpc", "/observer/rpc"):
             print("Error connecting to /observer/rpc port")
 
+        self.client_gaze_rpc_port = yarp.Port()
+        self.client_gaze_rpc_port.open("/gaze_rpc")
+        
+        if not yarp.Network.connect("/gaze_rpc", "/GazeController"):
+            print("Error connecting to /GazeController port")
+
         self.client_fake_nws_rpc_port = yarp.Port()
         self.client_fake_nws_rpc_port.open("/fake_nws_rpc")  # Name of the local port
 
@@ -287,6 +293,7 @@ class Planner(yarp.RFModule):
                             done = True
                         elif func=='look_obj_around':
                             object = fn_args["object"]
+                            #fn_res = fcn(self.client_obj_det_rpc_port, self.client_gaze_rpc_port, self.client_obj_dets_port, object)
                             fn_res = fcn(self.client_obj_det_rpc_port, self.client_obj_dets_port, object)
                             #fn_res = fcn()
                             done = True
@@ -364,7 +371,7 @@ class Planner(yarp.RFModule):
         self.agent_output_port()
         return True
     
-#########################################333
+#########################################
 
 if __name__ == '__main__':
     
