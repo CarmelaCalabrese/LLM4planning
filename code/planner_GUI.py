@@ -147,14 +147,21 @@ class Planner(yarp.RFModule):
                
 
 
-    def _send_message_to_output_port(self, role: str, content: str, name: str = None):
-        msg_dict = {"role": role, "content": content}
+    def _send_message_to_output_port(self, role: str, content: str, name: str = None, args: dict = None):
+        msg_dict = {
+            "role": role,
+            "content": content
+        }
         if name:
             msg_dict["name"] = name
+        if args:
+            msg_dict["args"] = args
+
         msg_json = json.dumps(msg_dict)
         bot = self.agent_output_port.prepare()
         bot.clear()
         bot.addString(msg_json)
+        time.sleep(0.005)
         self.agent_output_port.write()
         
         return True
@@ -270,7 +277,8 @@ class Planner(yarp.RFModule):
                             + ")"
                         )
 
-                        self._send_message_to_output_port("tool", 'Calling ', name=func)
+                        print('I am sending to GUI')
+                        self._send_message_to_output_port("tool", 'Calling ', name=func, args=fn_args)
 
                         fcn = self.function_resolver[func]
                         done = False

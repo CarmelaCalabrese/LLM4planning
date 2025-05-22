@@ -89,36 +89,43 @@ class ChatViewerGUI:
         self.send_message_bar()
         return "break"  # prevent default newline behavior on Enter
 
-    def display_message(self, role, content, tool_call=False):
-        # Insert message text into the text widget with styling based on the role
+    def display_message(self, role, content, tool_call=False, name=None, args=None):
+        message = content
+
+        # Append args to the content if present
+        if args:
+            args_str = json.dumps(args, indent=2)
+            message += f"\n\n[ARGS]:\n{args_str}"
+
         if role == "tool" and tool_call:
-            self.text_widget.insert("end", content + "\n\n", ("tool", "tool_indent", "emoji"))
+            if name:
+                header = f"[TOOL CALL] {name}:\n"
+                self.text_widget.insert("end", header, ("tool", "tool_indent"))
+                self.text_widget.insert("end", message + "\n\n", ("tool", "tool_indent", "emoji"))
         elif role == "assistant":
-            self.text_widget.insert("end", content + "\n\n", ("assistant", "emoji"))
+            self.text_widget.insert("end", message + "\n\n", ("assistant", "emoji"))
         elif role == "user_human":
-            self.text_widget.insert("end", content + "\n\n", ("user_human", "emoji"))
+            self.text_widget.insert("end", message + "\n\n", ("user_human", "emoji"))
         else:
-            self.text_widget.insert("end", content + "\n\n", role)
-        # Scroll to the end to show the latest message
+            self.text_widget.insert("end", message + "\n\n", role)
+
         self.text_widget.see("end")
 
+
     def listen_to_agent(self):
-        # Continuously listen for incoming messages on the YARP port
         while self.running:
-            if self.yarp_port.getPendingReads() > 0:
+            while self.yarp_port.getPendingReads() > 0:
                 bottle = self.yarp_port.read(False)
                 if bottle is not None and bottle.size() > 0:
                     try:
-                        # Extract the JSON string from the first element of the bottle
                         msg_json = bottle.get(0).asString()
-                        # Parse JSON string into a dictionary
                         msg_dict = json.loads(msg_json)
-                        # Extract role and content from the message
                         role = msg_dict.get("role", "assistant")
                         content = msg_dict.get("content", "")
                         tool_call = role == "tool"
-                        # Schedule display_message to run in the Tkinter main thread (thread-safe)
-                        self.root.after(0, self.display_message, role, content, tool_call)
+                        name = msg_dict.get("name", None)
+                        args = msg_dict.get("args", None)
+                        self.root.after(0, self.display_message, role, content, tool_call, name, args)
                     except Exception as e:
                         print("Error parsing YARP message:", e)
 
