@@ -3,10 +3,14 @@ from tkinter import font
 import json
 import threading
 import yarp
+import tkinter.font as tkFont
+
 
 
 class ChatViewerGUI:
     def __init__(self, root):
+
+        print(tkFont.families())
         self.root = root
         self.root.title("Chat Viewer")  # Window title
 
@@ -19,7 +23,7 @@ class ChatViewerGUI:
 
         # Try to use a font that supports emoji; fallback if not available
         try:
-            self.emoji_font = font.Font(family="Symbola", size=30)
+            self.emoji_font = font.Font(family="Noto Color Emoji", size=30)
         except:
             self.emoji_font = self.big_font  # fallback to main font
 
@@ -69,16 +73,31 @@ class ChatViewerGUI:
         # Connect the agent's output port to this input port
         yarp.Network.connect("/agent/text:o", "/chat_viewer:i")
 
+        # Create a buffered port to send messages to the planner
+        self.yarp_out = yarp.BufferedPortBottle()
+        self.yarp_out.open("/chat_viewer:o")
+        yarp.Network.connect("/chat_viewer:o", "/agent/text:i")
+
         # Start a background thread that continuously listens for incoming YARP messages
         self.running = True
         threading.Thread(target=self.listen_to_agent, daemon=True).start()
+
+        # Test emoji rendering
+        self.text_widget.insert("end", "Test Emojis: 😀 🤖 💬 🔧 🧠 🚀 ❤️\n\n", ("assistant", "emoji"))
+
 
     def send_message_bar(self):
         # Get the user's input text from the entry field
         text = self.entry.get("1.0", "end-1c").strip()
         if text:
             # Display user's message in the chat window
-            self.display_message("user_human", text)
+            #self.display_message("user_human", text)
+
+            bottle = self.yarp_out.prepare()
+            bottle.clear()
+            bottle.addString(text)
+            self.yarp_out.write()
+
             # Clear the entry field after sending
             self.entry.delete("1.0", "end")
 
@@ -91,16 +110,18 @@ class ChatViewerGUI:
 
     def display_message(self, role, content, tool_call=False, name=None, args=None):
         message = content
+        if name:
+            message = message + name
 
         # Append args to the content if present
         if args:
             args_str = json.dumps(args, indent=2)
-            message += f"\n\n[ARGS]:\n{args_str}"
+            message += f"\n\n[Args]:\n{args_str}"
 
         if role == "tool" and tool_call:
             if name:
-                header = f"[TOOL CALL] {name}:\n"
-                self.text_widget.insert("end", header, ("tool", "tool_indent"))
+                #header = f"[Tool Call] {name}:\n"
+                #self.text_widget.insert("end", header, ("tool", "tool_indent"))
                 self.text_widget.insert("end", message + "\n\n", ("tool", "tool_indent", "emoji"))
         elif role == "assistant":
             self.text_widget.insert("end", message + "\n\n", ("assistant", "emoji"))

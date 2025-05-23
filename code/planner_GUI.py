@@ -278,7 +278,7 @@ class Planner(yarp.RFModule):
                         )
 
                         print('I am sending to GUI')
-                        self._send_message_to_output_port("tool", 'Calling ', name=func, args=fn_args)
+                        self._send_message_to_output_port("tool", '[Tool Call] ', name=func, args=fn_args)
 
                         fcn = self.function_resolver[func]
                         done = False
@@ -289,28 +289,34 @@ class Planner(yarp.RFModule):
                                 obj = fn_args["object"]
                             else:
                                 obj = None
-                            fn_res = fcn(action, obj, self.client_fake_nws_rpc_port)
+                            #fn_res = fcn(action, obj, self.client_fake_nws_rpc_port)
+                            fn_res = 'done'
                             done = True
                         elif func=='apply_emotion':
                             emotion = fn_args["emotion"]
-                            fn_res = fcn(emotion, self.client_emotion_rpc_port)
+                            #fn_res = fcn(emotion, self.client_emotion_rpc_port)
+                            fn_res = 'done'
                             done = True
                         elif func=='speak':
                             spoken_text = fn_args["text"]
-                            fn_res = fcn()
+                            #fn_res = fcn()
+                            
                             done = True
                         elif func=='look_obj_around':
                             object = fn_args["object"]
                             #fn_res = fcn(self.client_obj_det_rpc_port, self.client_gaze_rpc_port, self.client_obj_dets_port, object)
-                            fn_res = fcn(self.client_obj_det_rpc_port, self.client_obj_dets_port, object)
+                            #fn_res = fcn(self.client_obj_det_rpc_port, self.client_obj_dets_port, object)
                             #fn_res = fcn()
+                            fn_res = 'done'
                             done = True
                         elif func=='feedback_from_env':
                             print('feedback_from_env')
-                            fn_res = fcn(self.client_observer_rpc_port)
+                            #fn_res = fcn(self.client_observer_rpc_port)
+                            fn_res = 'done'
                             done = True
                         else:
-                            fn_res = fcn(**fn_args)
+                            #fn_res = fcn(**fn_args)
+                            fn_res = 'done'
                             done = True
                         
                         if done: 
