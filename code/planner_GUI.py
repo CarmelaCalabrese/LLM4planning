@@ -303,11 +303,11 @@ class Planner(yarp.RFModule):
                             
                             done = True
                         elif func=='look_obj_around':
-                            object = fn_args["object"]
-                            #fn_res = fcn(self.client_obj_det_rpc_port, self.client_gaze_rpc_port, self.client_obj_dets_port, object)
-                            #fn_res = fcn(self.client_obj_det_rpc_port, self.client_obj_dets_port, object)
+                            obj2look = fn_args["object"]
+                            #fn_res = fcn(self.client_obj_det_rpc_port, self.client_gaze_rpc_port, self.client_obj_dets_port, obj2look)
+                            fn_res = fcn(self.client_obj_det_rpc_port, self.client_obj_dets_port, obj2look)
                             #fn_res = fcn()
-                            fn_res = 'done'
+                            #fn_res = 'done'
                             done = True
                         elif func=='feedback_from_env':
                             print('feedback_from_env')

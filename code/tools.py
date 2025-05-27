@@ -240,11 +240,13 @@ def look_obj_around(client_obj_det_rpc_port, client_obj_dets_port, object) -> st
                     for i in range(0, centroid.size()):
                         centroid_list.append(int(centroid.get(i).asInt64()))
 
+                    print(centroid_list)
+
                     label = bboxe_btl.get(2).asString()
                     conf = bboxe_btl.get(3).asFloat64()
 
-                    print(f"I see {label} with confidence score {conf} in position {centroid_list} in the image plane.")
-                    detection.append(f"I see {label} with confidence score {conf} in position {centroid} in the image plane.")
+                    print(f"I see {label} with confidence score {conf:.2f} in position {str(centroid_list)} in the image plane.")
+                    detection.append(f"I see {label} with confidence score {conf:.2f} in position {str(centroid_list)} in the image plane.")
                     
                     
     result = ''.join(detection)
