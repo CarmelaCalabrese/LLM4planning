@@ -5,10 +5,72 @@ import sys
 import yaml
 import time
 import yarp
-
+import numpy as np
 from pathlib import Path
+import math
 # from mutual-gaze-classifier-demo import mutualgaze-classifier
 # import whisper
+
+
+def quaternion_matrix(quaternion):  #Copied from https://github.com/ros/geometry/blob/noetic-devel/tf/src/tf/transformations.py#L1515
+    """Return homogeneous rotation matrix from quaternion.
+
+    >>> R = quaternion_matrix([0.06146124, 0, 0, 0.99810947])
+    >>> numpy.allclose(R, rotation_matrix(0.123, (1, 0, 0)))
+    True
+
+    """
+    # epsilon for testing whether a number is close to zero
+    _EPS = np.finfo(float).eps * 4.0
+
+    q = np.array(quaternion[:4], dtype=np.float64, copy=True)
+    nq = np.dot(q, q)
+    if nq < _EPS:
+        return np.identity(4)
+    q *= math.sqrt(2.0 / nq)
+    q = np.outer(q, q)
+    return np.array((
+        (1.0-q[1, 1]-q[2, 2],     q[0, 1]-q[2, 3],     q[0, 2]+q[1, 3], 0.0),
+        (    q[0, 1]+q[2, 3], 1.0-q[0, 0]-q[2, 2],     q[1, 2]-q[0, 3], 0.0),
+        (    q[0, 2]-q[1, 3],     q[1, 2]+q[0, 3], 1.0-q[0, 0]-q[1, 1], 0.0),
+        (                0.0,                 0.0,                 0.0, 1.0)
+        ), dtype=np.float64)
+
+
+def axis_angle_matrix(pose, axis, angle):
+    """Return homogeneous rotation matrix from pose, axis, angle."""
+    rx = axis[0]
+    ry = axis[1]
+    rz = axis[2]
+
+    cosine = math.cos(angle)
+    sine = math.sin(angle)
+
+    return np.array((
+        (rx^2*(1-cosine)+cosine,     rx*ry*(1-cosine)-rz*sine,     rx*rz*(1-cosine)+ry*sine, pose[0]),
+        (rx*ry*(1-cosine)+rz*sine,   ry^2*(1-cosine)+cosine,    ry*rz*(1-cosine)-rx*sine, pose[1]),
+        (rx*rz*(1-cosine)-ry*sine,   ry*rz*(1-cosine)+rx*sine,  rz^2*(1-cosine)+cosine, pose[2]),
+        (                0.0,                 0.0,                 0.0, 1.0)
+        ), dtype=np.float64)
+
+
+
+def camera2root (vec, pose, axis, angle):
+    # Point in camera frame (x, y, z)
+    p_cam = np.array([vec, 1.0])  # homogeneous coordinates
+
+    #T_cam_to_root = quaternion_matrix(quaternion)    # Homogeneous transformation matrix (4x4) from camera to root
+    T_cam_to_root = axis_angle_matrix(pose, axis, angle)    # Homogeneous transformation matrix (4x4) from camera to root
+    
+    # Transform the point
+    p_root_homogeneous = T_cam_to_root @ p_cam
+
+    # Extract the 3D coordinates
+    p_root = p_root_homogeneous[:3]
+
+    print("Point in root frame:", p_root)
+    return p_root
+
 
 
 
@@ -189,6 +251,23 @@ def look_obj_around(client_obj_det_rpc_port, client_obj_dets_port, object) -> st
     :return: It returns objects, confidence, and x,y positions in the image plane.
     """
    
+    ## Move head around
+    # Create a request bottle and a response bottle
+    request = yarp.Bottle()
+    response = yarp.Bottle()
+
+    #yarp rpc /GazeController
+    #look_at: point the camera to a 3D point in the robot frame
+
+    # Add a command to the request bottle (you can modify this as needed)
+    request.addString("look_at")  # Command
+    request.addList(())  # I need to understand how to say theta head degrees on the right
+
+    # Send the RPC command and receive the response
+    client_gaze_rpc_port.write(request, response)
+    result = response.toString()
+
+    ## Look for object
     # Create a request bottle and a response bottle
     request = yarp.Bottle()
     response = yarp.Bottle()
@@ -230,10 +309,10 @@ def look_obj_around(client_obj_det_rpc_port, client_obj_dets_port, object) -> st
                     print(f'Box idx: {i+1}')
                     bboxe_btl = received_bboxes.get(i).asList()
 
-                    x1y1x2y2 = bboxe_btl.get(0).asList()
-                    x1y1x2y2_list= []
-                    for i in range(0, x1y1x2y2.size()):
-                        x1y1x2y2_list.append(int(x1y1x2y2.get(i).asFloat64()))
+                    u1v1u2v2 = bboxe_btl.get(0).asList()
+                    u1v1u2v2_list= []
+                    for i in range(0, u1v1u2v2.size()):
+                        u1v1u2v2_list.append(int(u1v1u2v2.get(i).asFloat64()))
                     
                     centroid = bboxe_btl.get(1).asList()
                     centroid_list= []
@@ -242,14 +321,59 @@ def look_obj_around(client_obj_det_rpc_port, client_obj_dets_port, object) -> st
 
                     print(centroid_list)
 
-                    label = bboxe_btl.get(2).asString()
-                    conf = bboxe_btl.get(3).asFloat64()
+                    xyz = bboxe_btl.get(2).asList()
+                    xyz_camera_frame_list= []
+                    for i in range(0, xyz.size()):
+                        xyz_camera_frame_list.append(int(xyz.get(i).asInt64()))
+
+                    print(xyz_camera_frame_list) #in camera frame!!!!
+
+                    label = bboxe_btl.get(3).asString()
+                    conf = bboxe_btl.get(4).asFloat64()
 
                     print(f"I see {label} with confidence score {conf:.2f} in position {str(centroid_list)} in the image plane.")
                     detection.append(f"I see {label} with confidence score {conf:.2f} in position {str(centroid_list)} in the image plane.")
                     
                     
     result = ''.join(detection)
+
+    if not result:
+        return "Checking"
+    return result
+
+
+def point_at_obj_around(client_controller_port, ergocub_rs_pose, xyz_camera_frame_list) -> str:
+
+    """
+
+    :return: It returns objects, confidence, and x,y positions in the image plane.
+    """
+   
+    ## Get xyz_camera_frame_list in robot frame
+    #read /ergocub-rs-pose/pose:o to get camera pose in robot frame : x y z axis_x axis_y axis_z angle vector
+    received_camera_pose = ergocub_rs_pose.read()
+    if received_camera_pose:
+            print(f'# Camera pose: {received_camera_pose.size()}')
+
+            answer = received_camera_pose.get(0).asList()
+            pose = answer[:2]
+            axis = answer[3:5]
+            angle = answer[6] 
+            
+
+    xyz_root_frame = camera2root(xyz_camera_frame_list, axis, angle, pose)
+
+    ## Give command to the end effector to point at the object
+    # Create a request bottle and a response bottle
+    request = yarp.Bottle()
+    response = yarp.Bottle()
+
+    # # Add a command to the request bottle (you can modify this as needed)
+    # request.addString("get_bbox")  # Command
+    # request.addString(f'{object}')  # Action
+
+
+    # time.sleep(0.5)
 
     if not result:
         return "Checking"
