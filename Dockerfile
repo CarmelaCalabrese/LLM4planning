@@ -30,7 +30,7 @@ RUN pip install openai pillow opencv-python matplotlib
 RUN curl -fsSL https://ollama.com/install.sh | sh
 ENV PATH="/root/.ollama/bin:$PATH"
 
-RUN pip install --no-input git+https://github.com/huggingface/transformers
+#RUN pip install --no-input git+https://github.com/huggingface/transformers
 RUN pip install --no-input qwen-vl-utils[decord]==0.0.8
 
 RUN git clone https://github.com/CarmelaCalabrese/LLM4planning.git
