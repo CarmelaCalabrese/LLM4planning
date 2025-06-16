@@ -58,8 +58,8 @@ class Planner(yarp.RFModule):
         self.client_emotion_rpc_port = yarp.Port()
         self.client_emotion_rpc_port.open("/client_emotion_rpc")  # Name of the local port
 
-        if not yarp.Network.connect("/client_emotion_rpc", "/ergoCubEmotions/rpc"):
-            print("Error connecting to /ergoCubEmotions/rpc port")
+        if not yarp.Network.connect("/client_emotion_rpc", "/faceExpressionImage/rpc"):
+            print("Error connecting to /faceExpressionImage/rpc port")
 
         self.client_obj_det_rpc_port = yarp.Port()
         self.client_obj_det_rpc_port.open("/client_yolo_rpc")  # Name of the local port

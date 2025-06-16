@@ -21,6 +21,13 @@
   </module>
 
   <module>
+		<name>./set_navigation_position.sh</name>
+    <node>console</node>
+    <workdir>/usr/local/src/robot/tour-guide-robot/app/navigation2/scripts/</workdir>
+  </module>
+    
+
+  <module>
 		<name>yarprobotinterface</name>
 		<parameters>--context navigation2 --from realsense2_remote.ini</parameters>
     <node>r1-torso</node>
@@ -35,18 +42,6 @@
   <module>
 		<name>faceExpressionImage5GTour</name>
 		<node>console-llm</node>
-  </module>
-
-  <module>
-		<name>/usr/local/src/robot/hsp/ergocub-bimanual/build/command_prompt</name>
-		<parameters>/Components/Manipulation /usr/local/src/robot/hsp/ergocub-bimanual/config/ergocub_real.ini</parameters>
-    <node>ergocub-torso</node>
-  </module>
-
-  <module>
-		<name>/usr/local/src/robot/hsp/ergocub-bimanual/build/command_server</name>
-		<parameters>/Components/Manipulation /ergocub /usr/local/src/robot/robotology-superbuild/src/ergocub-software/urdf/ergoCub/robots/ergoCubSN001/model.urdf /usr/local/src/robot/hsp/ergocub-bimanual/config/ergocub_real_wristless.ini</parameters>
-    <node>ergocub-torso</node>
   </module>
 
   <module>
@@ -105,7 +100,7 @@
 
   <module>
     <name>python3</name>
-    <parameters>/usr/local/src/robot/tour-guide-robot/aux_modules/speechProcessing/openWakeWord/oww.py --models hey_erra_uno.onnx</parameters>
+    <parameters>/usr/local/src/robot/tour-guide-robot/aux_modules/speechProcessing/openWakeWord/oww.py</parameters>
     <node>console-llm</node>
   </module>  
 
@@ -123,22 +118,29 @@
   <module>
     <name>yarprobotinterface</name>
     <parameters>--context vadModule --from audioPlayer.ini</parameters>
-    <node>speech_docker</node>
+    <node>r1-face</node>
   </module>
-    
   
   <!-- speech synthesizer -->
   <module>
     <name>yarprobotinterface</name>
-    <parameters>--context google --from googleSynthesizer.ini --synthesis_lang it-IT --synthesis_voice it-IT-Neural2-A</parameters>
+    <parameters>--context google --from googleSynthesizer.ini</parameters>
     <node>console-llm</node>
   </module>
     
   <!-- speech transcriber -->
   <module>
     <name>yarprobotinterface</name>
-    <parameters>---context google --from googleTranscription.ini --transcription_lang it-IT</parameters>
+    <parameters>--context google --from googleTranscription.ini</parameters>
     <node>console-llm</node>
+  </module>
+
+  <!-- actions -->
+  <module>
+    <name>yarpActionsPlayer</name>
+    <parameters>--filename yarpActionPlayer_config.ini --execute</parameters>
+    <node>console</node>
+    <workdir>/home/r1-user/yarpActionsPlayerFiles</workdir>
   </module>
 
     <!-- Modules connections -->
@@ -168,15 +170,19 @@
 		<to>/observer/text:i</to>
 	</connection>
 
-<!-- <connection>
-      <from>/audioRecorder_nws/audio:o</from>
-      <to>/vad/audio:i</to>
-      <protocol>tcp+recv.portmonitor+file.soundfilter_resample+type.dll+channel.0+frequency.16000</protocol>
-   </connection>-->
-
   <connection>
       <from>/audioRecorder_nws/audio:o</from>
+      <to>/wake/audio:i</to>
+  </connection>
+
+  <connection>
+      <from>/wake/audio:o</from>
       <to>/vad/audio:i</to>
+  </connection>
+
+  <connection>
+      <from>/vad/rpc:o</from>
+      <to>/wake/rpc:i</to>
   </connection>
 
   <connection>
@@ -194,22 +200,21 @@
       <to>/robot/faceDisplay/image:i</to>
   </connection>
 
-	<!-- <connection>
-      <from>/vad/audio:o</from>
-      <to>/speechTranscription_nws/sound:i</to>
-      <protocol>tcp+recv.portmonitor+file.soundfilter_resample+type.dll+channel.0+frequency.16000</protocol>
-   </connection> -->
+  <connection>
+      <from>/wake/notification:o</from>
+      <to>/wake_notification:i</to>
+  </connection>  
+
+  <connection>
+      <from>/wake/face:o</from>
+      <to>/faceExpressionImage/rpc</to>
+  </connection>  
 
   <connection>
       <from>/vad/audio:o</from>
       <to>/speechTranscription_nws/sound:i</to>
   </connection> 
 
-<!--     <connection>
-		<from>/speechTranscription_nws/text:o</from>
-		<to>/agent/text:i</to>
-		<protocol>fast_tcp</protocol>
-	</connection> -->
 
   <!-- Connections -->
  
