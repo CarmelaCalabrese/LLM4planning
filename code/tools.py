@@ -2,7 +2,7 @@
 
 import platform
 import sys
-import yaml
+#import yaml
 import time
 import yarp
 import numpy as np
