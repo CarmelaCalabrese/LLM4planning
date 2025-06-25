@@ -31,6 +31,10 @@ class Planner(yarp.RFModule):
         self.agent_output_port = yarp.BufferedPortBottle()
         self.agent_output_port.open(self.agent_output_portName)
 
+        self.speaker_output_portName = "/speaker/text:o"
+        self.speaker_output_port = yarp.BufferedPortBottle()
+        self.speaker_output_port.open(self.speaker_output_portName)
+
         self.observer_text_portName = "/observer/text:i"
         self.observer_text_port = yarp.BufferedPortBottle()
         self.observer_text_port.open(self.observer_text_portName)
@@ -39,13 +43,12 @@ class Planner(yarp.RFModule):
         self.intState_text_port = yarp.BufferedPortBottle()
         self.intState_text_port.open(self.intState_text_portName)
 
-        # # Open RPC client ports
-        # self.client_action_rpc_port = yarp.Port()
-        # self.client_action_rpc_port.open("/client_action_rpc")  # Name of the local port
+        # Open RPC client ports
+        self.client_action_rpc_port = yarp.Port()
+        self.client_action_rpc_port.open("/client_action_rpc")  # Name of the local port
 
-        # if not yarp.Network.connect("/client_action_rpc", "/commandPrompt"):
-        #     print("Error connecting to /server port")
-        #     #exit()
+        if not yarp.Network.connect("/client_action_rpc", "/yarpActionsPlayer/rpc"):
+            print("Error connecting to /yarpActionsPlayer/rpc port")
 
         # # Open RPC client ports
         # self.manipulation_rpc_port = yarp.Port()
@@ -58,8 +61,8 @@ class Planner(yarp.RFModule):
         self.client_emotion_rpc_port = yarp.Port()
         self.client_emotion_rpc_port.open("/client_emotion_rpc")  # Name of the local port
 
-        if not yarp.Network.connect("/client_emotion_rpc", "/ergoCubEmotions/rpc"):
-            print("Error connecting to /ergoCubEmotions/rpc port")
+        if not yarp.Network.connect("/client_emotion_rpc", "/faceExpressionImage/rpc"):
+            print("Error connecting to /faceExpressionImage/rpc port")
 
         self.client_obj_det_rpc_port = yarp.Port()
         self.client_obj_det_rpc_port.open("/client_yolo_rpc")  # Name of the local port
@@ -255,7 +258,7 @@ class Planner(yarp.RFModule):
 
             if (response.choices[0].message.content is not None):
                 content = response.choices[0].message.content
-                print("🤖💭 ergoCub: " + content +'\n')
+                print("🤖💭 R1: " + content +'\n')
                 self._send_message_to_output_port("assistant", content)
 
             # run with function calls as long as necessary
@@ -290,17 +293,17 @@ class Planner(yarp.RFModule):
                             else:
                                 obj = None
                             #fn_res = fcn(action, obj, self.client_fake_nws_rpc_port)
-                            fn_res = 'done'
+                            fn_res = fcn(action, self.client_action_rpc_port)
+                            #fn_res = 'done'
                             done = True
                         elif func=='apply_emotion':
                             emotion = fn_args["emotion"]
-                            #fn_res = fcn(emotion, self.client_emotion_rpc_port)
-                            fn_res = 'done'
+                            fn_res = fcn(emotion, self.client_emotion_rpc_port)
+                            #fn_res = 'done'
                             done = True
                         elif func=='speak':
                             spoken_text = fn_args["text"]
-                            #fn_res = fcn()
-                            
+                            fn_res = fcn(spoken_text, self.speaker_output_port)    
                             done = True
                         elif func=='look_obj_around':
                             obj2look = fn_args["object"]
@@ -344,7 +347,7 @@ class Planner(yarp.RFModule):
 
                 if (response.choices[0].message.content is not None):
                     bottle_answer = response.choices[0].message.content
-                    print("🤖💭 ergoCub: " + bottle_answer +'\n')
+                    print("🤖💭 R1: " + bottle_answer +'\n')
                     self._send_message_to_output_port("assistant", bottle_answer)
                 else:
                     bottle_answer = ""

@@ -2,6 +2,7 @@
 
 import platform
 import sys
+#import yaml
 import time
 import yarp
 import numpy as np
@@ -73,80 +74,76 @@ def camera2root (vec, pose, axis, angle):
 
 
 
-def do_response_action(action, client_port, manipulation_port) -> str:
+def do_response_action(action, client_port) -> str:
 #def do_response_action(action) -> str:
     """
-    Run the most appropriate action during human-robot interaction. You can be 'ready' [home posture-DEFAULT], 'wave' [wave your harm to say hello], 'shake' [shake hand to introduce yourself], 't_pose' [to assume a t-pose]. 
+    Run the most appropriate action during human-robot interaction. You can be 'ready' [home posture-DEFAULT], 'wave' [wave your harm to say hello], 'shake' [shake hand to introduce yourself]. 
     To call this function, you have to specify which action you want to do.
 
-    Available actions: ready [default], wave, shake, t_pose
+    Available actions: ready [default], wave, shake
 
     :return: Result message.
     """
    
+    # Create a request bottle and a response bottle
+    request = yarp.Bottle()
+    response = yarp.Bottle()
+
+    # Add a command to the request bottle (you can modify this as needed)
+    request.addString(f'reset')  # Action
+
+    # Send the RPC command and receive the response
+    client_port.write(request, response)
+    result = response.toString()
+
+    if action == 'wave':
+        action = 'wave_hand' 
+    elif action == 'shake':
+        action = 'handshake'
+
     # Create a request bottle and a response bottle
     request = yarp.Bottle()
     response = yarp.Bottle()
 
     #if action is not 'ready':
     # Add a command to the request bottle (you can modify this as needed)
-    request.addString(f'{action}')  # Action
+    request.addString(f'play')  # Action
+    request.addString(f'{action}') 
 
     # Send the RPC command and receive the response
     client_port.write(request, response)
     result = response.toString()
-    # if result == 'Problema'or 'Capito':
-    #     result = 'done'
-    # print(f"Response: Action {action} result: {result}")
-
-    check_act = False
-    while check_act:
-        print('Sono qui')
-        manipulation_port.write('is_finished', response)
-        #result = response.toString()
-        if result=='[ok]':
-            check_act = True
-        print(result)
-
-    time.sleep(5)
-    # Add a command to the request bottle (you can modify this as needed)
-    request2 = yarp.Bottle()
-    response2 = yarp.Bottle()
-
-    request2.addString('home')  # Back home
-    client_port.write(request2, response2)
-
-    # # Send the RPC command and receive the response
-    # client_port.write(request, response)
-    # result = response.toString()
-    # if result == 'Problema'or 'Capito':
-    #     result = 'Fatto'
-    # print(f"Response: Action 'ready' result: {result}")
 
     if not result:
         return "Action running"
     return result
 
 
-def apply_emotion(emotion, client_port, manipulation_port) -> str:
+def apply_emotion(emotion, client_port) -> str:
 #def apply_emotion(emotion) -> str:
     """
-    Run the most appropriate emotion on ergoCub's face during human-robot interaction. You can smile, be puzzled, be unhappy. 
+    Run the most appropriate emotion on ergoCub's face during human-robot interaction. You can be happy, neutral or sad. 
     To call this function, you have to specify which emotion you want to act.
 
-    Available emotions: neutral [default], happy, alert, shy
+    Available emotions: neutral [default], happy, sad
     
     :return: Result message.
     """
+
+    if emotion == 'neutral':
+        emotion = 2
+    elif emotion == 'happy':
+        emotion = 1
+    elif emotion == 'sad':
+        emotion = 0
    
     # Create a request bottle and a response bottle
     request = yarp.Bottle()
     response = yarp.Bottle()
 
     # Add a command to the request bottle (you can modify this as needed)
-    request.addString("setEmotion")  # Command
-    request.addString(f'{emotion}')  # Emotion
-
+    request.addString(f'emotion')  # Emotion
+    request.addInt64(emotion)
 
     # Send the RPC command and receive the response
     client_port.write(request, response)
@@ -155,23 +152,22 @@ def apply_emotion(emotion, client_port, manipulation_port) -> str:
     # Print the response
     print(f"Response: {result}")
 
-    time.sleep(10)
+    if emotion != '2':
+        time.sleep(10)
 
-    # # Check if any action is running, I keep the emotion and then I go back to neutral
-    # check_act = False
-    # while check_act:
-    #     manipulation_port.write('is_finished', response)
-    #     #result = response.toString()
-    #     if result=='[ok]':
-    #         check_act = True
+        # Create a request bottle and a response bottle
+        request = yarp.Bottle()
+        response = yarp.Bottle()
 
-    # # Add a command to the request bottle (you can modify this as needed)
-    # request2 = yarp.Bottle()
-    # response2 = yarp.Bottle()
+        # Add a command to the request bottle (you can modify this as needed)
+        request.addString(f'emotion 2')  # Back to neutral
 
-    # request2.addString("setEmotion")  # Command
-    # request2.addString("neutral")  # Emotion
-    # client_port.write(request2, response2)
+        # Send the RPC command and receive the response
+        client_port.write(request, response)
+        result = response.toString()
+
+        # Print the response
+        print(f"Response: {result}")
 
     if not result:
         return "Emotion running"
@@ -179,8 +175,8 @@ def apply_emotion(emotion, client_port, manipulation_port) -> str:
 
 
 
-#def speak(text, speak_port) -> str:
-def speak(text) -> str:
+def speak(text, speak_port) -> str:
+#def speak(text) -> str:
     """
     It allows ergoCub speaking during human-robot interaction. 
     To call this function, you have to the text to say.
@@ -199,6 +195,12 @@ def speak(text) -> str:
     # # Send the RPC command and receive the response
     # client_port.write(request, response)
     # result = response.toString()
+
+    
+    bot = speak_port.prepare()
+    bot.clear()
+    bot.addString(text)
+    speak_port.write()
 
     result =f'Text {text} sent.'
 
