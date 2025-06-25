@@ -5,13 +5,13 @@ tools = [
         "type": "function",
         "function": {
             "name": "do_response_action",
-            "description": "Run the most appropriate action during human-robot interaction. You can be 'ready' [home posture-DEFAULT], 'wave' [wave your harm to say hello], 'shake' [shake hand to introduce yourself], 't_pose' [to assume a t-pose]. To call this function, you have to specify which action you want to do.",
+            "description": "Run the most appropriate action during human-robot interaction. You can be 'ready' [home posture-DEFAULT], 'wave' [wave your harm to say hello], 'shake' [shake hand to introduce yourself]. To call this function, you have to specify which action you want to do.",
             "parameters": {
 				"type": "object",
 				"properties": {
                     "action": {
                         "type": "string", 
-                        "description": "The name of the action to run. The action must be coherent with the interaction. Available values: ready [default], wave, shake, t_pose.",
+                        "description": "The name of the action to run. The action must be coherent with the interaction. Available values: ready [default], wave, shake.",
                         },
                     },
                 "required": ["action"]},
@@ -21,13 +21,13 @@ tools = [
         "type": "function",
         "function": {
             "name": "apply_emotion",
-            "description": "Run the most appropriate emotion on ergoCub's face during human-robot interaction. You can smile, be puzzled, be unhappy. To call this function, you have to specify which emotion you want to act.",
+            "description": "Run the most appropriate emotion on ergoCub's face during human-robot interaction. You can be happy, neutral or sad. To call this function, you have to specify which emotion you want to act.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "emotion": {
                         "type": "string",
-                        "description": "The name of the emotion to act. The emotion must be coherent with the interaction. Available values: neutral [default], happy, alert, shy.",
+                        "description": "The name of the emotion to act. The emotion must be coherent with the interaction. Available values:  neutral [default], happy, sad",
                     },
                 },
                 "required": ["emotion"],
