@@ -83,7 +83,7 @@ class ChatViewerGUI:
         threading.Thread(target=self.listen_to_agent, daemon=True).start()
 
         # Test emoji rendering
-        self.text_widget.insert("end", "Test Emojis: 😀 🤖 💬 🔧 🧠 🚀 ❤️\n\n", ("assistant", "emoji"))
+        #self.text_widget.insert("end", "Test Emojis: 😀 🤖 💬 🔧 🧠 🚀 ❤️\n\n", ("assistant", "emoji"))
 
 
     def send_message_bar(self):
