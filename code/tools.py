@@ -2,7 +2,6 @@
 
 import platform
 import sys
-import yaml
 import time
 import yarp
 import numpy as np
@@ -251,21 +250,21 @@ def look_obj_around(client_obj_det_rpc_port, client_obj_dets_port, object) -> st
     :return: It returns objects, confidence, and x,y positions in the image plane.
     """
    
-    ## Move head around
-    # Create a request bottle and a response bottle
-    request = yarp.Bottle()
-    response = yarp.Bottle()
+    # ## Move head around
+    # # Create a request bottle and a response bottle
+    # request = yarp.Bottle()
+    # response = yarp.Bottle()
 
-    #yarp rpc /GazeController
-    #look_at: point the camera to a 3D point in the robot frame
+    # #yarp rpc /GazeController
+    # #look_at: point the camera to a 3D point in the robot frame
 
-    # Add a command to the request bottle (you can modify this as needed)
-    request.addString("look_at")  # Command
-    request.addList(())  # I need to understand how to say theta head degrees on the right
+    # # Add a command to the request bottle (you can modify this as needed)
+    # request.addString("look_at")  # Command
+    # request.addList(())  # I need to understand how to say theta head degrees on the right
 
-    # Send the RPC command and receive the response
-    client_gaze_rpc_port.write(request, response)
-    result = response.toString()
+    # # Send the RPC command and receive the response
+    # client_gaze_rpc_port.write(request, response)
+    # result = response.toString()
 
     ## Look for object
     # Create a request bottle and a response bottle
@@ -321,12 +320,12 @@ def look_obj_around(client_obj_det_rpc_port, client_obj_dets_port, object) -> st
 
                     print(centroid_list)
 
-                    xyz = bboxe_btl.get(2).asList()
-                    xyz_camera_frame_list= []
-                    for i in range(0, xyz.size()):
-                        xyz_camera_frame_list.append(int(xyz.get(i).asInt64()))
+                    # xyz = bboxe_btl.get(2).asList()
+                    # xyz_camera_frame_list= []
+                    # for i in range(0, xyz.size()):
+                    #     xyz_camera_frame_list.append(int(xyz.get(i).asInt64()))
 
-                    print(xyz_camera_frame_list) #in camera frame!!!!
+                    # print(xyz_camera_frame_list) #in camera frame!!!!
 
                     label = bboxe_btl.get(3).asString()
                     conf = bboxe_btl.get(4).asFloat64()
