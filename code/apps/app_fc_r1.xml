@@ -12,55 +12,48 @@
   <module>
 		<name>yarplogger</name>
 		<parameters>--start</parameters>
-    <node>ergocub001-lap</node>
+    <node>r1-base</node>
   </module>
 
   <module>
 		<name>yarprobotinterface</name>
-		<parameters>--config ergocub_all.xml</parameters>
-    <node>ergocub-torso</node>
+    <node>r1-base</node>
   </module>
 
   <module>
-		<name>yarpmotorgui</name>
-		<parameters>--from custom_positions.ini</parameters>
-    <node>ergocub001-lap</node>
+		<name>./set_navigation_position.sh</name>
+    <node>console</node>
+    <workdir>/usr/local/src/robot/tour-guide-robot/app/navigation2/scripts/</workdir>
+  </module>
+    
+
+  <module>
+		<name>yarprobotinterface</name>
+		<parameters>--context navigation2 --from realsense2_remote.ini</parameters>
+    <node>r1-torso</node>
   </module>
 
   <module>
 		<name>yarprobotinterface</name>
-		<parameters>--config realsense2.xml</parameters>
-    <node>ergocub-head</node>
+		<parameters>--context headSynchronizer --from faceDisplay.ini</parameters>
+    <node>r1-face</node>
   </module>
 
   <module>
-		<name>ergocubEmotions</name>
-		<parameters>--context ergoCubEmotions --from config.ini</parameters>
-    <node>ergocub-head</node>
-  </module>
-
-  <module>
-		<name>/usr/local/src/robot/hsp/ergocub-bimanual/build/command_prompt</name>
-		<parameters>/Components/Manipulation /usr/local/src/robot/hsp/ergocub-bimanual/config/ergocub_real.ini</parameters>
-    <node>ergocub-torso</node>
-  </module>
-
-  <module>
-		<name>/usr/local/src/robot/hsp/ergocub-bimanual/build/command_server</name>
-		<parameters>/Components/Manipulation /ergocub /usr/local/src/robot/robotology-superbuild/src/ergocub-software/urdf/ergoCub/robots/ergoCubSN001/model.urdf /usr/local/src/robot/hsp/ergocub-bimanual/config/ergocub_real_wristless.ini</parameters>
-    <node>ergocub-torso</node>
+		<name>faceExpressionImage5GTour</name>
+		<node>console-llm</node>
   </module>
 
   <module>
 		<name>yarpview</name>
 		<parameters>--name /viewer</parameters>
-    <node>ergocub001-lap</node>
+    <node>console</node>
 	</module>
 
   <module>
 		<name>yarpview</name>
 		<parameters>--name /viewer_yoloDet</parameters>
-    <node>ergocub001-lap</node>
+    <node>console</node>
 	</module>
 
   <module>
@@ -102,47 +95,63 @@
   <module>
     <name>yarprobotinterface</name>
     <parameters>--context speechPipeline --from micAudio.ini --mic_sound_on_stop 0 --mic_start 1 --mic_min_samples 4000 --mic_max_samples 4000</parameters>
-    <node>ergocub-head</node>
+    <node>r1-torso</node>
   </module>
-    
-    
+
+  <module>
+    <name>python3</name>
+    <parameters>/usr/local/src/robot/tour-guide-robot/aux_modules/speechProcessing/openWakeWord/oww.py</parameters>
+    <node>console-llm</node>
+  </module>  
+
+  <module>
+    <name>python3</name>
+    <parameters>/usr/local/src/robot/tour-guide-robot/aux_modules/speechProcessing/wakeWordDetection/play_notification.py</parameters>
+    <node>r1-face</node>
+  </module>  
+
   <module>
     <name>sileroVAD</name>
-    <parameters></parameters>
-    <environment>YARP_LOG_PROCESS_LABEL=VAD</environment>
-    <node>speech_docker</node>
+    <node>console-llm</node>
   </module>
     
   <module>
     <name>yarprobotinterface</name>
     <parameters>--context vadModule --from audioPlayer.ini</parameters>
-    <node>speech_docker</node>
+    <node>r1-face</node>
   </module>
-    
   
-      <!-- speech synthesizer -->
-    <module>
+  <!-- speech synthesizer -->
+  <module>
     <name>yarprobotinterface</name>
     <parameters>--context google --from googleSynthesizer.ini</parameters>
-    <node>speech_docker</node>
-    </module>
+    <node>console-llm</node>
+  </module>
     
-    
-      <module>
+  <!-- speech transcriber -->
+  <module>
     <name>yarprobotinterface</name>
     <parameters>--context google --from googleTranscription.ini</parameters>
-    <node>speech_docker</node>
-    </module>
+    <node>console-llm</node>
+  </module>
+
+  <!-- actions -->
+  <module>
+    <name>yarpActionsPlayer</name>
+    <parameters>--filename yarpActionPlayer_config.ini --execute</parameters>
+    <node>console</node>
+    <workdir>/home/r1-user/yarpActionsPlayerFiles</workdir>
+  </module>
 
     <!-- Modules connections -->
 
 	<connection>
-    <from>/depthCamera/rgbImage:o</from>
+    <from>/cer/realsense_repeater/rgbImage:o</from>
     <to>/viewer</to>
   </connection>
 
   <connection>
-    <from>/depthCamera/rgbImage:o</from>
+    <from>/cer/realsense_repeater/rgbImage:o</from>
     <to>/yoloWDet/image:i</to>
   </connection>
 
@@ -152,7 +161,7 @@
   </connection>
 
 	<connection>
-    <from>/depthCamera/rgbImage:o</from>
+    <from>/cer/realsense_repeater/rgbImage:o</from>
      <to>/observer/image:i</to>
   </connection>
 
@@ -161,23 +170,51 @@
 		<to>/observer/text:i</to>
 	</connection>
 
-<!-- <connection>
+  <connection>
       <from>/audioRecorder_nws/audio:o</from>
-      <to>/vad/audio:i</to>
-      <protocol>tcp+recv.portmonitor+file.soundfilter_resample+type.dll+channel.0+frequency.16000</protocol>
-   </connection>
+      <to>/wake/audio:i</to>
+  </connection>
 
-	<connection>
+  <connection>
+      <from>/wake/audio:o</from>
+      <to>/vad/audio:i</to>
+  </connection>
+
+  <connection>
+      <from>/vad/rpc:o</from>
+      <to>/wake/rpc:i</to>
+  </connection>
+
+  <connection>
+      <from>/audioPlayerWrapper/status:o</from>
+      <to>/faceExpressionImage/mouthAudioData:i</to>
+  </connection>
+
+  <connection>
+      <from>/audioRecorder_nws/status:o</from>
+      <to>/faceExpressionImage/earsAudioData:i</to>
+  </connection>
+
+  <connection>
+      <from>/faceExpressionImage/image:o</from>
+      <to>/robot/faceDisplay/image:i</to>
+  </connection>
+
+  <connection>
+      <from>/wake/notification:o</from>
+      <to>/wake_notification:i</to>
+  </connection>  
+
+  <connection>
+      <from>/wake/face:o</from>
+      <to>/faceExpressionImage/rpc</to>
+  </connection>  
+
+  <connection>
       <from>/vad/audio:o</from>
       <to>/speechTranscription_nws/sound:i</to>
-      <protocol>tcp+recv.portmonitor+file.soundfilter_resample+type.dll+channel.0+frequency.16000</protocol>
-   </connection> -->
+  </connection> 
 
-<!--     <connection>
-		<from>/speechTranscription_nws/text:o</from>
-		<to>/iLLM/text:i</to>
-		<protocol>fast_tcp</protocol>
-	</connection> -->
 
   <!-- Connections -->
  
