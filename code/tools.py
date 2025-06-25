@@ -74,10 +74,10 @@ def camera2root (vec, pose, axis, angle):
 
 
 
-def do_response_action(action, client_port, manipulation_port) -> str:
+def do_response_action(action, client_port) -> str:
 #def do_response_action(action) -> str:
     """
-    Run the most appropriate action during human-robot interaction. You can be 'ready' [home posture-DEFAULT], 'wave' [wave your harm to say hello], 'shake' [shake hand to introduce yourself], 't_pose' [to assume a t-pose]. 
+    Run the most appropriate action during human-robot interaction. You can be 'ready' [home posture-DEFAULT], 'wave' [wave your harm to say hello], 'shake' [shake hand to introduce yourself]. 
     To call this function, you have to specify which action you want to do.
 
     Available actions: ready [default], wave, shake
@@ -107,7 +107,8 @@ def do_response_action(action, client_port, manipulation_port) -> str:
 
     #if action is not 'ready':
     # Add a command to the request bottle (you can modify this as needed)
-    request.addString(f'play {action}')  # Action
+    request.addString(f'play')  # Action
+    request.addString(f'{action}') 
 
     # Send the RPC command and receive the response
     client_port.write(request, response)
@@ -118,10 +119,10 @@ def do_response_action(action, client_port, manipulation_port) -> str:
     return result
 
 
-def apply_emotion(emotion, client_port, manipulation_port) -> str:
+def apply_emotion(emotion, client_port) -> str:
 #def apply_emotion(emotion) -> str:
     """
-    Run the most appropriate emotion on ergoCub's face during human-robot interaction. You can smile, be puzzled, be unhappy. 
+    Run the most appropriate emotion on ergoCub's face during human-robot interaction. You can be happy, neutral or sad. 
     To call this function, you have to specify which emotion you want to act.
 
     Available emotions: neutral [default], happy, sad
@@ -130,18 +131,19 @@ def apply_emotion(emotion, client_port, manipulation_port) -> str:
     """
 
     if emotion == 'neutral':
-        emotion = '2' 
+        emotion = 2
     elif emotion == 'happy':
-        emotion = '1' 
+        emotion = 1
     elif emotion == 'sad':
-        emotion = '0' 
+        emotion = 0
    
     # Create a request bottle and a response bottle
     request = yarp.Bottle()
     response = yarp.Bottle()
 
     # Add a command to the request bottle (you can modify this as needed)
-    request.addString(f'emotion {emotion}')  # Emotion
+    request.addString(f'emotion')  # Emotion
+    request.addInt64(emotion)
 
     # Send the RPC command and receive the response
     client_port.write(request, response)
@@ -173,8 +175,8 @@ def apply_emotion(emotion, client_port, manipulation_port) -> str:
 
 
 
-#def speak(text, speak_port) -> str:
-def speak(text) -> str:
+def speak(text, speak_port) -> str:
+#def speak(text) -> str:
     """
     It allows ergoCub speaking during human-robot interaction. 
     To call this function, you have to the text to say.
@@ -193,6 +195,12 @@ def speak(text) -> str:
     # # Send the RPC command and receive the response
     # client_port.write(request, response)
     # result = response.toString()
+
+    
+    bot = speak_port.prepare()
+    bot.clear()
+    bot.addString(text)
+    speak_port.write()
 
     result =f'Text {text} sent.'
 
@@ -244,21 +252,21 @@ def look_obj_around(client_obj_det_rpc_port, client_obj_dets_port, object) -> st
     :return: It returns objects, confidence, and x,y positions in the image plane.
     """
    
-    ## Move head around
-    # Create a request bottle and a response bottle
-    request = yarp.Bottle()
-    response = yarp.Bottle()
+    # ## Move head around
+    # # Create a request bottle and a response bottle
+    # request = yarp.Bottle()
+    # response = yarp.Bottle()
 
-    #yarp rpc /GazeController
-    #look_at: point the camera to a 3D point in the robot frame
+    # #yarp rpc /GazeController
+    # #look_at: point the camera to a 3D point in the robot frame
 
-    # Add a command to the request bottle (you can modify this as needed)
-    request.addString("look_at")  # Command
-    request.addList(())  # I need to understand how to say theta head degrees on the right
+    # # Add a command to the request bottle (you can modify this as needed)
+    # request.addString("look_at")  # Command
+    # request.addList(())  # I need to understand how to say theta head degrees on the right
 
-    # Send the RPC command and receive the response
-    client_gaze_rpc_port.write(request, response)
-    result = response.toString()
+    # # Send the RPC command and receive the response
+    # client_gaze_rpc_port.write(request, response)
+    # result = response.toString()
 
     ## Look for object
     # Create a request bottle and a response bottle
@@ -314,12 +322,12 @@ def look_obj_around(client_obj_det_rpc_port, client_obj_dets_port, object) -> st
 
                     print(centroid_list)
 
-                    xyz = bboxe_btl.get(2).asList()
-                    xyz_camera_frame_list= []
-                    for i in range(0, xyz.size()):
-                        xyz_camera_frame_list.append(int(xyz.get(i).asInt64()))
+                    # xyz = bboxe_btl.get(2).asList()
+                    # xyz_camera_frame_list= []
+                    # for i in range(0, xyz.size()):
+                    #     xyz_camera_frame_list.append(int(xyz.get(i).asInt64()))
 
-                    print(xyz_camera_frame_list) #in camera frame!!!!
+                    # print(xyz_camera_frame_list) #in camera frame!!!!
 
                     label = bboxe_btl.get(3).asString()
                     conf = bboxe_btl.get(4).asFloat64()
