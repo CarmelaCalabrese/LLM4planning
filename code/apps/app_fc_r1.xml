@@ -159,22 +159,22 @@
     <!-- Modules connections -->
 
 	<connection>
-    <from>/cer/realsense_repeater/rgbImage:o</from>
+    <from>/cer/realsense/rgbImage:o</from>
     <to>/viewer</to>
   </connection>
 
   <connection>
-    <from>/cer/realsense_repeater/rgbImage:o</from>
-    <to>/yoloWDet/image:i</to>
+    <from>/cer/realsense/rgbImage:o</from>
+    <to>/yoloWDet/rgbImage:i</to>
   </connection>
 
   <connection>
-    <from>/yoloWDet/image:o</from>
-    <to>/viewer2</to>
+    <from>/yoloWDet/rgbImage:o</from>
+    <to>/viewer_yoloDet</to>
   </connection>
 
 	<connection>
-    <from>/cer/realsense_repeater/rgbImage:o</from>
+    <from>/cer/realsense/rgbImage:o</from>
      <to>/observer/image:i</to>
   </connection>
 
@@ -243,6 +243,16 @@
  
   <connection>  
     <from>/speechTranscription_nws/text:o</from>
+    <to>/agent/text:i</to>
+  </connection>
+
+  <connection>  
+    <from>/agent/text:o</from>
+    <to>/chat_viewer:i</to>
+  </connection>
+
+  <connection>  
+    <from>/chat_viewer:o</from>
     <to>/agent/text:i</to>
   </connection>
  
